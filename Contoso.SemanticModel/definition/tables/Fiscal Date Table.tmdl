@@ -1,0 +1,77 @@
+table 'Fiscal Date Table'
+	lineageTag: 7bc9971c-def4-4e9b-a052-835c0febda95
+
+	column Date
+		formatString: Short Date
+		lineageTag: da69f7bd-0499-4c8b-a372-d13551b11147
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Fiscal Year' = ```
+			
+			
+			VAR CurrYear = YEAR('Fiscal Date Table'[Date])
+			
+			VAR LastYear = YEAR('Fiscal Date Table'[Date])-1
+			
+			VAR NewYear = YEAR('Fiscal Date Table'[Date]) +1
+			
+			VAR FiscalYear =
+			    SWITCH(
+			        TRUE(),
+			        MONTH('Fiscal Date Table'[Date]) > 1,
+			        CurrYear & "/" & NewYear,
+			        LastYear & "/" & CurrYear
+			    )
+			RETURN
+			    FiscalYear
+			
+			```
+		lineageTag: 4c2a8aa9-54c6-4f77-b75d-3ce7e7ffbf39
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Fiscal Month' = ```
+			
+			
+			VAR CurrentYear = YEAR([Date])
+			VAR CurrentMonth = MONTH([Date])
+			VAR CurrentDay = DAY([Date])
+			
+			VAR FiscalStartMonth = 2  // February
+			VAR FiscalStartDay = 5     // 5th
+			
+			VAR MonthOffset =
+			    IF(
+			        CurrentDay >= FiscalStartDay, 
+			        CurrentMonth - FiscalStartMonth, 
+			        CurrentMonth - FiscalStartMonth - 1
+			    )
+			    
+			VAR AdjustedMonthOffset = IF(MonthOffset < 0, MonthOffset + 12, MonthOffset)
+			
+			RETURN AdjustedMonthOffset + 1
+			```
+		formatString: 0
+		lineageTag: b9d689eb-4f1d-4d3d-96fb-ecd1fe8cb6e2
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Fiscal Date Table' = calculated
+		mode: import
+		source =
+				
+				CALENDAR(
+				    MIN(Sales[Date]),
+				    MAX(Sales[Date])
+				)
+
+	annotation PBI_Id = 8499ea72066b4abc8b67dea3d2d70ede
+

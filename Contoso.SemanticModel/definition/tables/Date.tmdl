@@ -1,0 +1,67 @@
+table Date
+	lineageTag: 75a633b9-de16-4e1c-8a8f-a47bfbdf1c56
+	dataCategory: Time
+
+	column Date
+		isKey
+		formatString: Short Date
+		lineageTag: 65b0b05c-a3fd-458b-9909-6c21b54c3445
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year = YEAR('Date'[Date])
+		formatString: 0
+		lineageTag: 18bae2ea-7971-4b17-afde-7a49a6516c1c
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter = FORMAT('Date'[Date], "\QQ")
+		lineageTag: b1dda80b-6689-4373-b351-d92040b0d9cb
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Quarter Sort' = QUARTER('Date'[Date])
+		formatString: 0
+		lineageTag: f5a0494a-4dd0-40b5-a504-d66ecaee4a1e
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month = FORMAT('Date'[Date], "mmm")
+		lineageTag: 05082f11-6744-4165-9cfe-60d24b503f0e
+		summarizeBy: none
+		sortByColumn: 'Month Sort'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Sort' = MONTH('Date'[Date])
+		formatString: 0
+		lineageTag: d9cd830a-c2b8-41c4-9c83-5c07e6c68cde
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Day of week' = FORMAT('Date'[Date], "dddd")
+		lineageTag: 131b06b0-7f77-4c0f-a063-468602a9afb8
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Date = calculated
+		mode: import
+		source =
+				
+				CALENDAR(
+				    MIN('Sales'[Date]),
+				    MAX('Sales'[Date])
+				)
+
+	annotation PBI_Id = 667b50eebcf94214bb1c1aa9122f226d
+

@@ -1,0 +1,57 @@
+table Geography
+	lineageTag: b93aee6c-b840-4064-8da5-e699c4df630b
+
+	column GeographyKey
+		dataType: string
+		isHidden
+		isKey
+		lineageTag: c75530d9-12ea-440c-9a24-8cb5dde34040
+		summarizeBy: none
+		sourceColumn: GeographyKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Geography Type'
+		dataType: string
+		lineageTag: 92b15185-f142-4253-8ab2-82adcc67b32a
+		summarizeBy: none
+		sourceColumn: Geography Type
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Continent Name'
+		dataType: string
+		lineageTag: 10b603bf-82ef-45d6-8b46-aa654700448a
+		dataCategory: Continent
+		summarizeBy: none
+		sourceColumn: Continent Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Country
+		dataType: string
+		lineageTag: 833a56ed-5e26-4d14-aef6-a9c3ffea3d07
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Geography-bc066b86-4713-4798-a67d-e17304656609 = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\tunde\OneDrive\Desktop\Contoso Data\Geography.csv"),[Delimiter=",", Columns=4, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Replaced Value" = Table.ReplaceValue(#"Promoted Headers","",null,Replacer.ReplaceValue,{"RegionCountryName"}),
+				    #"Filled Down" = Table.FillDown(#"Replaced Value",{"RegionCountryName"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Filled Down",{{"ContinentName", "Continent Name"}, {"RegionCountryName", "Country"}, {"GeographyType", "Geography Type"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

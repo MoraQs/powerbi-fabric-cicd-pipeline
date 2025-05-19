@@ -1,0 +1,107 @@
+DEFINE
+	COLUMN '__SQDS0VisualCalcs'[Running Total] = 
+		(/* USER DAX BEGIN */
+RUNNINGSUM([Revenue])
+/* USER DAX END */)
+
+	COLUMN '__SQDS0VisualCalcs'[Moving Avg] = 
+		(/* USER DAX BEGIN */
+MOVINGAVERAGE([Revenue], 3)
+/* USER DAX END */)
+
+	VAR __SQDS0FilterTable = 
+		FILTER(
+			KEEPFILTERS(VALUES('Date'[Month Name])),
+			NOT('Date'[Month Name] IN {BLANK()})
+		)
+
+	VAR __SQDS0Core = 
+		SUMMARIZECOLUMNS(
+			ROLLUPADDISSUBTOTAL(
+				ROLLUPGROUP('Date'[Month Name], 'Date'[Month Number]), "IsSQDS0GrandTotalRowTotal"
+			),
+			__SQDS0FilterTable,
+			"Revenue", 'Sales'[Revenue]
+		)
+
+	VAR __SQDS0VisualCalcsInput = 
+		SELECTCOLUMNS(
+			KEEPFILTERS(
+				SELECTCOLUMNS(
+					__SQDS0Core,
+					"Month_Name", 'Date'[Month Name],
+					"Month_Number", 'Date'[Month Number],
+					"IsSQDS0GrandTotalRowTotal", [IsSQDS0GrandTotalRowTotal],
+					"Revenue", [Revenue]
+				)
+			),
+			"Month Name", [Month_Name],
+			"Month_Number", [Month_Number],
+			"IsSQDS0GrandTotalRowTotal", [IsSQDS0GrandTotalRowTotal],
+			"Revenue", [Revenue]
+		)
+
+	TABLE '__SQDS0VisualCalcs' = 
+		__SQDS0VisualCalcsInput
+		WITH VISUAL SHAPE
+			AXIS rows
+				GROUP
+					[Month Name],
+					[Month_Number]
+					TOTAL [IsSQDS0GrandTotalRowTotal]
+				ORDER BY
+					[Month_Number] ASC,
+					[Month Name] ASC
+			DENSIFY "IsDensifiedRow"
+
+	VAR __SQDS0RemoveEmptyDensified = 
+		FILTER(
+			KEEPFILTERS('__SQDS0VisualCalcs'),
+			OR(
+				OR(
+					NOT('__SQDS0VisualCalcs'[IsDensifiedRow]),
+					NOT(ISBLANK('__SQDS0VisualCalcs'[Running Total]))
+				),
+				NOT(ISBLANK('__SQDS0VisualCalcs'[Moving Avg]))
+			)
+		)
+
+	VAR __DS0Core = 
+		SELECTCOLUMNS(
+			KEEPFILTERS(
+				FILTER(
+					KEEPFILTERS(__SQDS0RemoveEmptyDensified),
+					'__SQDS0VisualCalcs'[IsSQDS0GrandTotalRowTotal] = FALSE
+				)
+			),
+			"'__SQDS0VisualCalcs'[Month Name]", '__SQDS0VisualCalcs'[Month Name],
+			"'__SQDS0VisualCalcs'[Revenue]", '__SQDS0VisualCalcs'[Revenue],
+			"'__SQDS0VisualCalcs'[Running Total]", '__SQDS0VisualCalcs'[Running Total],
+			"'__SQDS0VisualCalcs'[Moving Avg]", '__SQDS0VisualCalcs'[Moving Avg],
+			"'__SQDS0VisualCalcs'[Month_Number]", '__SQDS0VisualCalcs'[Month_Number]
+		)
+
+	VAR __DS0RemoveContextOnlyColumns = 
+		SELECTCOLUMNS(
+			KEEPFILTERS(__DS0Core),
+			"'__SQDS0VisualCalcs'[Month Name]", '__SQDS0VisualCalcs'[Month Name],
+			"'__SQDS0VisualCalcs'[Revenue]", '__SQDS0VisualCalcs'[Revenue],
+			"'__SQDS0VisualCalcs'[Moving Avg]", '__SQDS0VisualCalcs'[Moving Avg],
+			"'__SQDS0VisualCalcs'[Month_Number]", '__SQDS0VisualCalcs'[Month_Number]
+		)
+
+	VAR __DS0PrimaryWindowed = 
+		TOPN(
+			1001,
+			__DS0RemoveContextOnlyColumns,
+			'__SQDS0VisualCalcs'[Month_Number],
+			1,
+			'__SQDS0VisualCalcs'[Month Name],
+			1
+		)
+
+EVALUATE
+	__DS0PrimaryWindowed
+
+ORDER BY
+	'__SQDS0VisualCalcs'[Month_Number], '__SQDS0VisualCalcs'[Month Name]

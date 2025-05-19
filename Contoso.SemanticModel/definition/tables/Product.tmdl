@@ -1,0 +1,108 @@
+table Product
+	lineageTag: c8f89a69-31af-4f07-967b-80c9b4b12cd3
+
+	column 'Product Name'
+		dataType: string
+		lineageTag: 77aee283-e7d0-4e6e-8273-d272cde25b18
+		summarizeBy: none
+		sourceColumn: Product Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Product Description'
+		dataType: string
+		lineageTag: 887c9b61-79f1-4095-9087-ea2dce4b9e35
+		summarizeBy: none
+		sourceColumn: Product Description
+
+		annotation SummarizationSetBy = Automatic
+
+	column Manufacturer
+		dataType: string
+		lineageTag: 518a2f1a-463c-40cd-b7eb-75cd8d5383f0
+		summarizeBy: none
+		sourceColumn: Manufacturer
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Brand Name'
+		dataType: string
+		lineageTag: 51c04aa1-9508-4718-ac6f-4aa613b35791
+		summarizeBy: none
+		sourceColumn: Brand Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Class Name'
+		dataType: string
+		lineageTag: c073a7a6-c7fb-4b8d-be71-99ad104e29d9
+		summarizeBy: none
+		sourceColumn: Class Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Unit Cost'
+		dataType: int64
+		formatString: 0
+		lineageTag: e54f042a-112c-4c3d-bbea-f3732a5b7933
+		summarizeBy: none
+		sourceColumn: Unit Cost
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Unit Price'
+		dataType: int64
+		formatString: 0
+		lineageTag: ade7ba2f-8775-46c7-aa0b-9c208612dc3f
+		summarizeBy: none
+		sourceColumn: Unit Price
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductKey
+		dataType: string
+		isHidden
+		lineageTag: 3b82d30e-8ca3-4fc8-9067-19348140c250
+		summarizeBy: none
+		sourceColumn: ProductKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Product Subcategory'
+		dataType: string
+		lineageTag: f306bf8c-8599-4a73-b241-da851830ba3f
+		summarizeBy: none
+		sourceColumn: Product Subcategory
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Product Category'
+		dataType: string
+		lineageTag: 6ad2032e-92d8-449c-8b8a-8e17d08e388c
+		summarizeBy: none
+		sourceColumn: Product Category
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Product-6c6f74df-9629-4595-8095-d7f89e22b2db = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\tunde\OneDrive\Desktop\Contoso Data\Product.csv"),[Delimiter=",", Columns=9, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Merged Queries" = Table.NestedJoin(#"Promoted Headers", {"ProductSubcategoryKey"}, ProductSubcategory, {"ProductSubcategoryKey"}, "ProductSubcategory", JoinKind.LeftOuter),
+				    #"Expanded ProductSubcategory" = Table.ExpandTableColumn(#"Merged Queries", "ProductSubcategory", {"ProductSubcategory", "ProductCategoryKey"}, {"ProductSubcategory.1", "ProductCategoryKey"}),
+				    #"Merged Queries1" = Table.NestedJoin(#"Expanded ProductSubcategory", {"ProductCategoryKey"}, ProductCategory, {"ProductCategoryKey"}, "ProductCategory", JoinKind.LeftOuter),
+				    #"Expanded ProductCategory" = Table.ExpandTableColumn(#"Merged Queries1", "ProductCategory", {"ProductCategory"}, {"ProductCategory.1"}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Expanded ProductCategory",{"ProductSubcategoryKey", "ProductCategoryKey"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns",{{"ProductCategory.1", "Product Category"}, {"ProductSubcategory.1", "Product Subcategory"}, {"ProductKey", "ProductKey"}, {"UnitPrice", "Unit Price"}, {"UnitCost", "Unit Cost"}, {"ClassName", "Class Name"}, {"BrandName", "Brand Name"}, {"ProductDescription", "Product Description"}, {"ProductName", "Product Name"}}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Renamed Columns",{{"Unit Cost", Int64.Type}, {"Unit Price", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

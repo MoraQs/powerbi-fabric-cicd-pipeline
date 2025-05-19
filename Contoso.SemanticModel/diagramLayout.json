@@ -1,0 +1,126 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 28.162017339794588,
+            "y": 310.61969178082188
+          },
+          "nodeIndex": "Channel",
+          "nodeLineageTag": "a3afefbb-b0f5-426e-9118-1afa03e89183",
+          "size": {
+            "height": 149.74005549448066,
+            "width": 234
+          },
+          "zIndex": 6
+        },
+        {
+          "location": {
+            "x": 885.13442364122022,
+            "y": 632.56950045389385
+          },
+          "nodeIndex": "Geography",
+          "nodeLineageTag": "b93aee6c-b840-4064-8da5-e699c4df630b",
+          "size": {
+            "height": 181.43501387362016,
+            "width": 234
+          },
+          "zIndex": 5
+        },
+        {
+          "location": {
+            "x": 0,
+            "y": 5
+          },
+          "nodeIndex": "Product",
+          "nodeLineageTag": "c8f89a69-31af-4f07-967b-80c9b4b12cd3",
+          "size": {
+            "height": 195.94046799466884,
+            "width": 234
+          },
+          "zIndex": 1
+        },
+        {
+          "location": {
+            "x": 0,
+            "y": 611.48288571299543
+          },
+          "nodeIndex": "Promotion",
+          "nodeLineageTag": "3ec13964-fe23-401c-8c74-d15b430cb660",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 7
+        },
+        {
+          "location": {
+            "x": 373.72565747591659,
+            "y": 227.0477869712727
+          },
+          "nodeIndex": "Sales",
+          "nodeLineageTag": "e6f6669e-a253-41f8-b987-301fa5cf54a3",
+          "size": {
+            "height": 386.07244450551934,
+            "width": 234
+          },
+          "zIndex": 2
+        },
+        {
+          "location": {
+            "x": 778.34214066109212,
+            "y": 300.79167749889166
+          },
+          "nodeIndex": "Stores",
+          "nodeLineageTag": "8350c261-e5c2-4899-a7c4-ad298cd1d4a0",
+          "size": {
+            "height": 176.54723640121676,
+            "width": 234
+          },
+          "zIndex": 8
+        },
+        {
+          "location": {
+            "x": 1048.2511000776813,
+            "y": 0
+          },
+          "nodeIndex": "Fiscal Date Table",
+          "nodeLineageTag": "7bc9971c-def4-4e9b-a052-835c0febda95",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 4
+        },
+        {
+          "location": {
+            "x": 702.10110618119688,
+            "y": 0
+          },
+          "nodeIndex": "Date",
+          "nodeLineageTag": "75a633b9-de16-4e1c-8a8f-a47bfbdf1c56",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 3
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 80,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

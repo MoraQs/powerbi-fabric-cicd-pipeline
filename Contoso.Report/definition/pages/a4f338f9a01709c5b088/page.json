@@ -1,0 +1,16 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/1.4.0/schema.json",
+  "name": "a4f338f9a01709c5b088",
+  "displayName": "Sales Report Overview",
+  "displayOption": "FitToPage",
+  "height": 720,
+  "width": 1280,
+  "visibility": "HiddenInViewMode",
+  "visualInteractions": [
+    {
+      "source": "1cb52e84f5fe75b30684",
+      "target": "33ef3d4c92838cb0d2de",
+      "type": "NoFilter"
+    }
+  ]
+}

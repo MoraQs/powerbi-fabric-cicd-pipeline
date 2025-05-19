@@ -1,0 +1,24 @@
+relationship cfa1910a-1e35-4148-8c00-723e82abffa6
+	fromColumn: Sales.StoreKey
+	toColumn: Stores.StoreKey
+
+relationship 088ec6a6-338d-45bd-8c32-6eac4cd77f93
+	fromColumn: Sales.PromotionKey
+	toColumn: Promotion.'Promotion Key'
+
+relationship a5ad0cd2-54e9-4ac8-9529-bc3e8488cbdf
+	fromColumn: Sales.GeographyKey
+	toColumn: Geography.GeographyKey
+
+relationship cb323fef-2a7c-4216-8576-99eb74189482
+	fromColumn: Sales.channelKey
+	toColumn: Channel.'Channel ID'
+
+relationship 799d29f9-38b9-871d-da80-310b53922272
+	fromColumn: Sales.Date
+	toColumn: Date.Date
+
+relationship 1bd6f65c-2ec4-7f88-132a-9b42e39d0bb8
+	fromColumn: Sales.ProductKey
+	toColumn: Product.ProductKey
+

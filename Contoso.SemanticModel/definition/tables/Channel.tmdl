@@ -1,0 +1,37 @@
+table Channel
+	lineageTag: a3afefbb-b0f5-426e-9118-1afa03e89183
+
+	column 'Channel ID'
+		dataType: string
+		isHidden
+		isKey
+		lineageTag: b3e0cf46-ac1a-4b38-820e-078cf1adc1ea
+		summarizeBy: none
+		sourceColumn: Channel ID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Channel Name'
+		dataType: string
+		lineageTag: aa8338b9-248f-4841-930f-8584e9a3bbc2
+		summarizeBy: none
+		sourceColumn: Channel Name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Channel-eaf70083-2f1b-456a-84cd-a611fd2056c5 = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\tunde\OneDrive\Desktop\Contoso Data\Channel.csv"),[Delimiter=",", Columns=2, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Renamed Columns" = Table.RenameColumns(#"Promoted Headers",{{"ChannelName", "Channel Name"}, {"Channel", "Channel ID"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
