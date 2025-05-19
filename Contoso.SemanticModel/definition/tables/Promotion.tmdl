@@ -28,7 +28,7 @@ table Promotion
 		annotation SummarizationSetBy = Automatic
 
 	column 'Discount Percent'
-		dataType: double
+		dataType: decimal
 		lineageTag: 9a2128bf-9de1-44ff-be76-6099a8dc6228
 		summarizeBy: none
 		sourceColumn: Discount Percent
@@ -60,9 +60,10 @@ table Promotion
 		source =
 				let
 				    Source = PostgreSQL.Database("localhost", "contoso_db"),
-				    public_promotion = Source{[Schema="public",Item="promotion"]}[Data]
+				    public_promotion = Source{[Schema="public",Item="promotion"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(public_promotion,{{"Discount Percent", Currency.Type}})
 				in
-				    public_promotion
+				    #"Changed Type"
 
 	annotation PBI_NavigationStepName = Navigation
 

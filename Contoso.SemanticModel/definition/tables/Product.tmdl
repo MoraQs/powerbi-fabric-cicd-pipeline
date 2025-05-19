@@ -41,24 +41,6 @@ table Product
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Unit Cost'
-		dataType: int64
-		formatString: 0
-		lineageTag: 7c08d788-10fc-4b42-89cf-4b67ea730113
-		summarizeBy: none
-		sourceColumn: Unit Cost
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'Unit Price'
-		dataType: int64
-		formatString: 0
-		lineageTag: 0e53df19-2862-4463-96fa-00976077408a
-		summarizeBy: none
-		sourceColumn: Unit Price
-
-		annotation SummarizationSetBy = Automatic
-
 	column productkey
 		dataType: int64
 		isHidden
@@ -92,9 +74,10 @@ table Product
 		source =
 				let
 				    Source = PostgreSQL.Database("localhost", "contoso_db"),
-				    public_product = Source{[Schema="public",Item="product"]}[Data]
+				    public_product = Source{[Schema="public",Item="product"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(public_product,{"Product Name", "Product Description", "manufacturer", "Brand Name", "Class Name", "productkey", "Product Subcategory", "Product Category"})
 				in
-				    public_product
+				    #"Removed Other Columns"
 
 	annotation PBI_NavigationStepName = Navigation
 

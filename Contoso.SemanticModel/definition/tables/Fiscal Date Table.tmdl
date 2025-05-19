@@ -4,7 +4,7 @@ table 'Fiscal Date Table'
 
 	column Date
 		isKey
-		formatString: Short Date
+		formatString: m/d/yyyy h:nn:ss AM/PM
 		lineageTag: da69f7bd-0499-4c8b-a372-d13551b11147
 		summarizeBy: none
 		isNameInferred
@@ -12,7 +12,7 @@ table 'Fiscal Date Table'
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
 
 	column 'Fiscal Year'
 		lineageTag: 0db1d72f-370d-4c79-ab30-d9ff391f6007

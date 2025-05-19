@@ -10,10 +10,6 @@ relationship AutoDetected_3d524b2f-91dd-4fcc-bf20-2996f0e5fcab
 	fromColumn: Sales.storekey
 	toColumn: Stores.storekey
 
-relationship 933748d3-d3f2-a2ac-28a1-56b2d36e7892
-	fromColumn: Sales.dateclean
-	toColumn: Date.Date
-
 relationship 1ada37f8-49e6-e93c-8546-ca7597e06a31
 	fromColumn: Sales.channelkey
 	toColumn: Channel.'Channel ID'
@@ -21,4 +17,8 @@ relationship 1ada37f8-49e6-e93c-8546-ca7597e06a31
 relationship d67a23bc-abaa-46ba-64cd-5887217c4d72
 	fromColumn: Sales.geographykey
 	toColumn: Geography.geographykey
+
+relationship c4426c87-86e8-2b79-a406-7bba4f8fcba6
+	fromColumn: Sales.date
+	toColumn: Date.Date
 
