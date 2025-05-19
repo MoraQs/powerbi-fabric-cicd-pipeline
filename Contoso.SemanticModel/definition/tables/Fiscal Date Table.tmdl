@@ -14,66 +14,69 @@ table 'Fiscal Date Table'
 
 		annotation UnderlyingDateTimeDataType = Date
 
-	column 'Fiscal Year' = ```
-			
-			
-			VAR CurrYear = YEAR('Fiscal Date Table'[Date])
-			
-			VAR LastYear = YEAR('Fiscal Date Table'[Date])-1
-			
-			VAR NewYear = YEAR('Fiscal Date Table'[Date]) +1
-			
-			VAR FiscalYear =
-			    SWITCH(
-			        TRUE(),
-			        MONTH('Fiscal Date Table'[Date]) > 1,
-			        CurrYear & "/" & NewYear,
-			        LastYear & "/" & CurrYear
-			    )
-			RETURN
-			    FiscalYear
-			
-			```
-		lineageTag: 4c2a8aa9-54c6-4f77-b75d-3ce7e7ffbf39
+	column 'Fiscal Year'
+		lineageTag: 0db1d72f-370d-4c79-ab30-d9ff391f6007
 		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Fiscal Year]
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Fiscal Month' = ```
-			
-			
-			VAR CurrentYear = YEAR([Date])
-			VAR CurrentMonth = MONTH([Date])
-			VAR CurrentDay = DAY([Date])
-			
-			VAR FiscalStartMonth = 2  // February
-			VAR FiscalStartDay = 5     // 5th
-			
-			VAR MonthOffset =
-			    IF(
-			        CurrentDay >= FiscalStartDay, 
-			        CurrentMonth - FiscalStartMonth, 
-			        CurrentMonth - FiscalStartMonth - 1
-			    )
-			    
-			VAR AdjustedMonthOffset = IF(MonthOffset < 0, MonthOffset + 12, MonthOffset)
-			
-			RETURN AdjustedMonthOffset + 1
-			```
+	column 'Fiscal Month'
 		formatString: 0
-		lineageTag: b9d689eb-4f1d-4d3d-96fb-ecd1fe8cb6e2
+		lineageTag: 84f2cd3b-1c88-4f99-a9cb-a076ae33a797
 		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Fiscal Month]
 
 		annotation SummarizationSetBy = Automatic
 
 	partition 'Fiscal Date Table' = calculated
 		mode: import
-		source =
+		source = ```
 				
-				CALENDAR(
-				    MIN(Sales[Date]),
-				    MAX(Sales[Date])
+				ADDCOLUMNS(
+				    CALENDAR(
+				        MIN(Sales[Date]),
+				        MAX(Sales[Date])
+				    ),
+				    "Fiscal Year",
+				        VAR CurrYear = YEAR([Date])
+				
+				        VAR LastYear = YEAR([Date])-1
+				
+				        VAR NewYear = YEAR([Date]) +1
+				
+				        VAR FiscalYear =
+				            SWITCH(
+				                TRUE(),
+				                MONTH([Date]) > 1,
+				                CurrYear & "/" & NewYear,
+				                LastYear & "/" & CurrYear
+				            )
+				        RETURN
+				            FiscalYear,
+				
+				    "Fiscal Month",
+				        VAR CurrentYear = YEAR([Date])
+				        VAR CurrentMonth = MONTH([Date])
+				        VAR CurrentDay = DAY([Date])
+				
+				        VAR FiscalStartMonth = 2  // February
+				        VAR FiscalStartDay = 5     // 5th
+				
+				        VAR MonthOffset =
+				            IF(
+				                CurrentDay >= FiscalStartDay, 
+				                CurrentMonth - FiscalStartMonth, 
+				                CurrentMonth - FiscalStartMonth - 1
+				            )
+				            
+				        VAR AdjustedMonthOffset = IF(MonthOffset < 0, MonthOffset + 12, MonthOffset)
+				
+				        RETURN AdjustedMonthOffset + 1
 				)
+				```
 
 	annotation PBI_Id = 8499ea72066b4abc8b67dea3d2d70ede
 

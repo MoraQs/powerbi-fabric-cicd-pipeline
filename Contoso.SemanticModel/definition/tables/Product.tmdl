@@ -61,6 +61,7 @@ table Product
 
 	column ProductKey
 		dataType: string
+		isHidden
 		lineageTag: 3b82d30e-8ca3-4fc8-9067-19348140c250
 		summarizeBy: none
 		sourceColumn: ProductKey

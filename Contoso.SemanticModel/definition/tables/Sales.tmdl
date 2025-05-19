@@ -171,6 +171,7 @@ table Sales
 
 	column channelKey
 		dataType: string
+		isHidden
 		lineageTag: 55036ff3-97ec-4a94-802f-53aa7553151b
 		summarizeBy: none
 		sourceColumn: channelKey
@@ -181,6 +182,7 @@ table Sales
 
 	column StoreKey
 		dataType: string
+		isHidden
 		lineageTag: 866cab04-631b-42f7-b79f-8b674d91dc6e
 		summarizeBy: none
 		sourceColumn: StoreKey
@@ -191,6 +193,7 @@ table Sales
 
 	column ProductKey
 		dataType: string
+		isHidden
 		lineageTag: 8f5ec267-3311-4ae8-82e5-96e497995481
 		summarizeBy: none
 		sourceColumn: ProductKey
@@ -201,6 +204,7 @@ table Sales
 
 	column PromotionKey
 		dataType: string
+		isHidden
 		lineageTag: bc613c64-1fd6-4ad4-9c09-ec1a07eabde0
 		summarizeBy: none
 		sourceColumn: PromotionKey
@@ -220,42 +224,55 @@ table Sales
 
 	column 'Unit Price'
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 8ce9cab2-6b12-4fc5-ab94-4652ad633783
 		summarizeBy: none
 		sourceColumn: Unit Price
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = User
 
 	column 'Sales Quantity'
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 4d50dfc5-fe0e-4b79-acf0-1c79a3897289
 		summarizeBy: none
 		sourceColumn: Sales Quantity
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = User
 
 	column 'Return Quantity'
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 06895c1a-b2ce-4b6f-a7cd-272fc66b4188
 		summarizeBy: none
 		sourceColumn: Return Quantity
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = User
 
 	column 'Discount Quantity'
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: bee49770-5221-4ddc-a179-0edd5bcff80d
 		summarizeBy: none
 		sourceColumn: Discount Quantity
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = User
 
 	column GeographyKey
 		dataType: string
+		isHidden
 		lineageTag: 8f9e693a-4878-4f20-810d-9388f64006e0
 		summarizeBy: none
 		sourceColumn: GeographyKey
@@ -265,9 +282,12 @@ table Sales
 		annotation SummarizationSetBy = Automatic
 
 	column DateClean = DATE(YEAR('Sales'[Date]), MONTH('Sales'[Date]), DAY('Sales'[Date]))
+		isHidden
 		formatString: General Date
 		lineageTag: 6e6e05dc-a72c-40c1-b80c-8a79581eead0
 		summarizeBy: none
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 

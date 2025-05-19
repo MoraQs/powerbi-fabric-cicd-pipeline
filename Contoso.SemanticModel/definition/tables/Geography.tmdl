@@ -3,6 +3,7 @@ table Geography
 
 	column GeographyKey
 		dataType: string
+		isHidden
 		isKey
 		lineageTag: c75530d9-12ea-440c-9a24-8cb5dde34040
 		summarizeBy: none

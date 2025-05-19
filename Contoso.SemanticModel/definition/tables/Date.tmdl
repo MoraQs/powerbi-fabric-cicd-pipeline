@@ -1,9 +1,7 @@
 table Date
 	lineageTag: 75a633b9-de16-4e1c-8a8f-a47bfbdf1c56
-	dataCategory: Time
 
 	column Date
-		isKey
 		formatString: Short Date
 		lineageTag: 65b0b05c-a3fd-458b-9909-6c21b54c3445
 		summarizeBy: none
@@ -14,54 +12,74 @@ table Date
 
 		annotation UnderlyingDateTimeDataType = Date
 
-	column Year = YEAR('Date'[Date])
+	column Year
 		formatString: 0
-		lineageTag: 18bae2ea-7971-4b17-afde-7a49a6516c1c
+		lineageTag: 7ffe18d9-c684-4d49-978e-75593057badb
 		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year]
 
 		annotation SummarizationSetBy = Automatic
 
-	column Quarter = FORMAT('Date'[Date], "\QQ")
-		lineageTag: b1dda80b-6689-4373-b351-d92040b0d9cb
+	column Quarter
+		lineageTag: 3a16b96e-dcd7-4a5c-af33-ce792fdad5e6
 		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Quarter]
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Quarter Sort' = QUARTER('Date'[Date])
+	column 'Quarter Sort'
 		formatString: 0
-		lineageTag: f5a0494a-4dd0-40b5-a504-d66ecaee4a1e
+		lineageTag: fa4b6921-70bc-4b5f-9c24-45cc08fd993e
 		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Quarter Sort]
 
 		annotation SummarizationSetBy = Automatic
 
-	column Month = FORMAT('Date'[Date], "mmm")
-		lineageTag: 05082f11-6744-4165-9cfe-60d24b503f0e
+	column Month
+		lineageTag: 516bdb03-d4f9-465e-b0e5-89b631695bb3
 		summarizeBy: none
-		sortByColumn: 'Month Sort'
+		isNameInferred
+		sourceColumn: [Month]
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Month Sort' = MONTH('Date'[Date])
+	column 'Month Sort'
 		formatString: 0
-		lineageTag: d9cd830a-c2b8-41c4-9c83-5c07e6c68cde
+		lineageTag: 2c8fd6e5-c428-4028-9c81-8b5baf5aa446
 		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Sort]
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Day of week' = FORMAT('Date'[Date], "dddd")
-		lineageTag: 131b06b0-7f77-4c0f-a063-468602a9afb8
+	column 'Day of week'
+		lineageTag: 5ab29c05-7a16-43dd-81b2-94f44242036e
 		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Day of week]
 
 		annotation SummarizationSetBy = Automatic
 
 	partition Date = calculated
 		mode: import
-		source =
+		source = ```
 				
-				CALENDAR(
-				    MIN('Sales'[Date]),
-				    MAX('Sales'[Date])
-				)
+				 ADDCOLUMNS(
+				    CALENDAR(
+				        MIN('Sales'[Date]),
+				        MAX('Sales'[Date])
+				    ),
+				    "Year", YEAR([Date]),
+				    "Quarter", FORMAT([Date], "\QQ"),
+				    "Quarter Sort", QUARTER([Date]),
+				    "Month", FORMAT([Date], "mmm"),
+				    "Month Sort", MONTH([Date]),
+				    "Day of week", FORMAT([Date], "dddd")
+				 )
+				```
 
 	annotation PBI_Id = 667b50eebcf94214bb1c1aa9122f226d
 
