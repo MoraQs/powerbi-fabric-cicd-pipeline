@@ -65,7 +65,7 @@ stages:
 
                   Write-Host "##[group]Running rules for: '$itemPath'"
 
-                  Start-Process -FilePath "$toolPath" -ArgumentList """$itemPath"" -A ""$rulesPath"" -V" -NoNewWindow -Wait
+                  # Start-Process -FilePath "$toolPath" -ArgumentList """$itemPath"" -A ""$rulesPath"" -V" -NoNewWindow -Wait
 
                   Write-Host "##[endgroup]"
               }
