@@ -3,6 +3,7 @@ table Stores
 
 	column StoreKey
 		dataType: string
+		isHidden
 		lineageTag: 8848a941-216a-48e6-9374-ea3dc181cf42
 		summarizeBy: none
 		sourceColumn: StoreKey

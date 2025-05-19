@@ -215,10 +215,13 @@ table Sales
 
 	column 'Unit Cost'
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 81ab78e6-cbdd-49a2-b913-c530c0934a27
 		summarizeBy: none
 		sourceColumn: Unit Cost
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = User
 
