@@ -48,6 +48,7 @@ table Product
 		lineageTag: 1804ed8c-8466-42b2-9590-d66e2cd75aa7
 		summarizeBy: none
 		sourceColumn: productkey
+		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
