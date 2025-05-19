@@ -1,7 +1,7 @@
 trigger: none
 
 pool:
-  vmimage: Default
+  name: Default
 
 stages:
  - stage: Build
