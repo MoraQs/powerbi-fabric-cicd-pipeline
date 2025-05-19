@@ -12,7 +12,7 @@ annotation __PBI_TimeIntelligenceEnabled = 0
 
 annotation PBI_QueryOrder = ["Calculations","Channel","Geography","Product","Promotion","Sales","Stores"]
 
-annotation PBI_ProTooling = ["DaxQueryView_Desktop","TMDLView_Desktop","DevMode","TMDL-Extension"]
+annotation PBI_ProTooling = ["DaxQueryView_Desktop","TMDLView_Desktop","DevMode"]
 
 ref table 'Fiscal Date Table'
 ref table Date

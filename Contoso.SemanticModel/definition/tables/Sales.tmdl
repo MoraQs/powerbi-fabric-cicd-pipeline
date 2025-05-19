@@ -43,7 +43,6 @@ table Sales
 		lineageTag: 732b3b21-b4b4-4f7d-b18f-3d23cec61b1b
 		summarizeBy: none
 		sourceColumn: storekey
-		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -56,7 +55,6 @@ table Sales
 		lineageTag: 67ebbaf5-bd9d-4ced-a674-de17043b0eed
 		summarizeBy: none
 		sourceColumn: productkey
-		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -69,7 +67,6 @@ table Sales
 		lineageTag: 9e2d0209-ca43-4228-ab74-c8fa06ed1625
 		summarizeBy: none
 		sourceColumn: promotionkey
-		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -81,7 +78,6 @@ table Sales
 		lineageTag: 8f7defec-dd63-402c-8164-b07c77036441
 		summarizeBy: none
 		sourceColumn: Unit Cost
-		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -95,7 +91,6 @@ table Sales
 		lineageTag: b1ea3f29-976a-46ae-be2d-8e2e6ada6554
 		summarizeBy: none
 		sourceColumn: Unit Price
-		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -110,7 +105,6 @@ table Sales
 		lineageTag: 3719e373-451d-4d11-b4ae-0eed227024e4
 		summarizeBy: none
 		sourceColumn: Sales Quantity
-		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -123,7 +117,6 @@ table Sales
 		lineageTag: 4afd515d-780b-4cca-93f4-9e407e201b41
 		summarizeBy: none
 		sourceColumn: Return Quantity
-		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -145,7 +138,6 @@ table Sales
 		lineageTag: 645e6da9-e774-4781-aec3-6025aef14aaa
 		summarizeBy: none
 		sourceColumn: geographykey
-		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 

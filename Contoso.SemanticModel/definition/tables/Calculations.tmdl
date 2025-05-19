@@ -54,14 +54,6 @@ table Calculations
 		formatString: #,0
 		lineageTag: a5f63983-3f03-418d-aaed-0d8600acaa08
 
-	measure 'Sales Amount Related' = ```
-			SUMX( Sales, (Sales[Sales Quantity] - Sales[Return Quantity] -Sales[Discount Quantity] ) * RELATED('Product'[Unit Price]) )
-			
-			
-			```
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: 5a7ddfef-7a3d-45ba-900e-6c064d369317
-
 	measure 'Sales Amount PY' = CALCULATE([Total Sales Amount], 'Date'[Year] = MAX('Date'[Year]) -1)
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		lineageTag: ba2a21eb-ec2e-40fa-ac5c-a492c40b7ea4
