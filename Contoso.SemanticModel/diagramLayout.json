@@ -19,20 +19,20 @@
             "height": 149.74005549448066,
             "width": 234
           },
-          "zIndex": 5
+          "zIndex": 4
         },
         {
           "location": {
-            "x": 885.13442364122022,
-            "y": 632.56950045389385
+            "x": 780.13442364122022,
+            "y": 622.56950045389385
           },
           "nodeIndex": "Geography",
-          "nodeLineageTag": "b93aee6c-b840-4064-8da5-e699c4df630b",
+          "nodeLineageTag": "5488dc65-3721-4dc0-8f4d-e3e509e593ca",
           "size": {
             "height": 181.43501387362016,
             "width": 234
           },
-          "zIndex": 4
+          "zIndex": 9
         },
         {
           "location": {
@@ -45,7 +45,7 @@
             "height": 195.94046799466884,
             "width": 234
           },
-          "zIndex": 1
+          "zIndex": 2
         },
         {
           "location": {
@@ -58,7 +58,7 @@
             "height": 224,
             "width": 234
           },
-          "zIndex": 6
+          "zIndex": 5
         },
         {
           "location": {
@@ -66,12 +66,12 @@
             "y": 227.0477869712727
           },
           "nodeIndex": "Sales",
-          "nodeLineageTag": "e6f6669e-a253-41f8-b987-301fa5cf54a3",
+          "nodeLineageTag": "fadd0681-8450-4826-b80d-49136a3e27d2",
           "size": {
-            "height": 493.57244450551934,
+            "height": 442.32244450551934,
             "width": 234
           },
-          "zIndex": 2
+          "zIndex": 8
         },
         {
           "location": {
@@ -84,7 +84,7 @@
             "height": 217.79723640121676,
             "width": 234
           },
-          "zIndex": 8
+          "zIndex": 7
         },
         {
           "location": {
@@ -110,7 +110,20 @@
             "height": 200,
             "width": 234
           },
-          "zIndex": 7
+          "zIndex": 6
+        },
+        {
+          "location": {
+            "x": 1332.2511000776813,
+            "y": 365.74144285649771
+          },
+          "nodeIndex": "Calculations",
+          "nodeLineageTag": "86a1133f-8570-449f-976b-eea8050ac94b",
+          "size": {
+            "height": 309,
+            "width": 234
+          },
+          "zIndex": 1
         }
       ],
       "name": "All tables",

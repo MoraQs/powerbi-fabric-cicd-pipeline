@@ -79,18 +79,19 @@
                       "Entity": "Product"
                     }
                   },
-                  "Property": "Manufacturer"
+                  "Property": "manufacturer"
                 }
               },
-              "queryRef": "Product.Manufacturer",
-              "nativeQueryRef": "Manufacturer"
+              "queryRef": "Product.manufacturer",
+              "nativeQueryRef": "Manufacturer",
+              "displayName": "Manufacturer"
             },
             {
               "field": {
                 "Measure": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "Sales"
+                      "Entity": "Calculations"
                     }
                   },
                   "Property": "Total Sales Amount"
@@ -105,7 +106,7 @@
                 "Measure": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "Sales"
+                      "Entity": "Calculations"
                     }
                   },
                   "Property": "Total Quatity"
@@ -119,7 +120,7 @@
                 "Measure": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "Sales"
+                      "Entity": "Calculations"
                     }
                   },
                   "Property": "Profit Margin"
@@ -138,7 +139,7 @@
               "Measure": {
                 "Expression": {
                   "SourceRef": {
-                    "Entity": "Sales"
+                    "Entity": "Calculations"
                   }
                 },
                 "Property": "Total Sales Amount"
@@ -191,20 +192,6 @@
           },
           "selector": {
             "metadata": "Product.Product Subcategory"
-          }
-        },
-        {
-          "properties": {
-            "value": {
-              "expr": {
-                "Literal": {
-                  "Value": "145.2523216313904D"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "Product.Manufacturer"
           }
         },
         {

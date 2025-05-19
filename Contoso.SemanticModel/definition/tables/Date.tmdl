@@ -1,7 +1,9 @@
 table Date
 	lineageTag: 75a633b9-de16-4e1c-8a8f-a47bfbdf1c56
+	dataCategory: Time
 
 	column Date
+		isKey
 		formatString: Short Date
 		lineageTag: 65b0b05c-a3fd-458b-9909-6c21b54c3445
 		summarizeBy: none

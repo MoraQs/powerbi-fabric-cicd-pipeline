@@ -1,0 +1,169 @@
+table Calculations
+	lineageTag: 86a1133f-8570-449f-976b-eea8050ac94b
+
+	measure Var1 = ```
+			
+			
+			VAR __salesAmount = [Total Sales Amount] 
+			
+			VAR __totalProfit = [Profit]
+			
+			VAR __profitMargin = DIVIDE( __totalProfit , __salesAmount )
+			
+			RETURN __salesAmount
+			```
+		formatString: #,0
+		lineageTag: 991177c0-c49a-4ae3-977e-228e57e56644
+
+	measure 'Total Sales EF' = CALCULATE([Total Sales Amount], 'Date'[Year] = 2011, 'Date'[Quarter] = "Q4", 'Geography'[Country] = "United States")
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 9634a635-42f1-4165-85f7-d3070ff1ea02
+
+	measure 'Total Sales Amount' = SUMX( 'Sales', 'Sales'[Unit Price] * ('Sales'[Sales Quantity] - 'Sales'[Return Quantity] - 'Sales'[Discount Quantity]) )
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 88a8133b-a5c6-4035-9898-92fc1fe483e8
+
+	measure 'Total Quatity' = SUM('Sales'[Sales Quantity])
+		formatString: #,0
+		lineageTag: 0067fd0c-70d3-48fb-a5fd-d1a9d760c074
+
+	measure 'SelectedV vs max' =
+			
+			
+			VAR _selectedValue = SELECTEDVALUE('Date'[Year])
+			
+			VAR _max = MAX('Date'[Year])
+			
+			RETURN _max
+		formatString: #,0
+		lineageTag: bbe28271-72e5-472b-a325-314f13d10098
+
+	measure 'Sales YTD 2' = TOTALYTD([Total Sales Amount], 'Date'[Date])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: f30f6908-e332-4c55-a63d-e134c015f905
+
+	measure 'Sales YTD' = CALCULATE([Total Sales Amount], DATESYTD('Date'[Date]))
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 72642fe1-d0f5-47fd-a070-c2125eae7dd8
+
+	measure 'Sales SPLY' = CALCULATE([Total Sales Amount], SAMEPERIODLASTYEAR('Date'[Date]))
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: cdc2919a-41f5-49b2-a035-6a320dd9fdea
+
+	measure 'Sales Amount RF' = CALCULATE( [Total Sales Amount], ALLSELECTED() )
+		formatString: #,0
+		lineageTag: a5f63983-3f03-418d-aaed-0d8600acaa08
+
+	measure 'Sales Amount Related' = ```
+			SUMX( Sales, (Sales[Sales Quantity] - Sales[Return Quantity] -Sales[Discount Quantity] ) * RELATED('Product'[Unit Price]) )
+			
+			
+			```
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 5a7ddfef-7a3d-45ba-900e-6c064d369317
+
+	measure 'Sales Amount PY' = CALCULATE([Total Sales Amount], 'Date'[Year] = MAX('Date'[Year]) -1)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: ba2a21eb-ec2e-40fa-ac5c-a492c40b7ea4
+
+	measure 'Sales Amount CY' = CALCULATE([Total Sales Amount], 'Date'[Year] = MAX('Date'[Year]))
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 5a53fe61-fbf6-4fa8-9480-1048e2a91408
+
+	measure 'Sales Amount AllExcept' =
+			
+			
+			CALCULATE(
+			    [Total Sales Amount],
+			    ALLEXCEPT(Sales, 'Date'[Month], Channel[Channel Name], 'Product'[Brand Name])
+			)
+		formatString: #,0
+		lineageTag: d66ff263-9e1b-43d6-ba06-f2e5a37cd7d4
+
+	measure Ranking =
+			
+			RANKX(
+			    ALL('Product'[Brand Name]),
+			    [Total Sales Amount],,DESC,Skip
+			)
+		formatString: #,0
+		lineageTag: 014b2172-d330-4dd9-8ed7-59abe9c6b451
+
+	measure 'Profit Margin' = DIVIDE([Profit], [Total Sales Amount], 0)
+		formatString: #,0.0%;-#,0.0%;#,0.0%
+		lineageTag: 347a5d7b-2e2c-429d-a253-8bda441f5355
+
+	measure Profit = SUMX( 'Sales', ('Sales'[Unit Price] - 'Sales'[Unit Cost]) * ('Sales'[Sales Quantity] - 'Sales'[Return Quantity] - 'Sales'[Discount Quantity]) )
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 9d682dd1-ce1a-4090-a0c8-f5afd1d754cc
+
+	measure 'Previous Day Amount' = CALCULATE([Total Sales Amount], PREVIOUSDAY('Date'[Date]))
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: acd17c1b-e40e-4d19-a63f-e3e571780ed8
+
+	measure 'Prev Day DA' = CALCULATE([Total Sales Amount], DATEADD('Date'[Date], -1, DAY))
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 0c9a55ad-624d-4d26-9d09-af8664934c53
+
+	measure 'DoD % change' = DIVIDE([Total Sales Amount] - [Previous Day Amount], [Previous Day Amount])
+		formatString: #,0.0%;-#,0.0%;#,0.0%
+		lineageTag: bfcd4098-8346-4563-9cd6-5c8a598cf2ec
+
+	measure 'CY vs PY' = ```
+			
+			
+			VAR __selectedYear = SELECTEDVALUE('Date'[Year])
+			
+			VAR __CYsales = 
+			
+			    CALCULATE(
+			        [Total Sales Amount],
+			        'Date'[Year] = __selectedYear
+			    )
+			
+			VAR __PYsales = 
+			    CALCULATE(
+			        [Total Sales Amount],
+			        'Date'[Year] = __selectedYear -1
+			    )
+			
+			VAR __percendiff = DIVIDE (__CYsales - __PYsales, __PYsales)
+			
+			RETURN __percendiff
+			```
+		formatString: #,0.0%;-#,0.0%;#,0.0%
+		lineageTag: 9ee6b651-260a-406f-9a31-b74ffded7163
+
+	measure '% SPLY' = DIVIDE([Total Sales Amount] - [Sales SPLY], [Sales SPLY])
+		formatString: #,0.0%;-#,0.0%;#,0.0%
+		lineageTag: 4b35ae29-2dc9-4399-9abd-0baf9e558a2c
+
+	measure '% GrandTotal' = DIVIDE( [Total Sales Amount], [Sales Amount RF] )
+		formatString: #,0.0%;-#,0.0%;#,0.0%
+		lineageTag: e9883904-c216-4d9a-8c73-3dae5720623f
+
+	measure '% change' = DIVIDE([Sales Amount CY] - [Sales Amount PY], [Sales Amount PY])
+		formatString: #,0.0%;-#,0.0%;#,0.0%
+		lineageTag: 1f4e78da-d1a0-48c0-a0e1-42149619e6e8
+
+	column Column1
+		dataType: string
+		isHidden
+		lineageTag: c48d0cdb-0223-4d6b-8909-5e552fdd2f7e
+		summarizeBy: none
+		sourceColumn: Column1
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Calculations = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t])
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

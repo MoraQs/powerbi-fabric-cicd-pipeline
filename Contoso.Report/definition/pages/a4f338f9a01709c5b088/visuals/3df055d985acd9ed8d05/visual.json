@@ -39,7 +39,7 @@
                 "Measure": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "Sales"
+                      "Entity": "Calculations"
                     }
                   },
                   "Property": "Total Sales Amount"
@@ -58,7 +58,7 @@
               "Measure": {
                 "Expression": {
                   "SourceRef": {
-                    "Entity": "Sales"
+                    "Entity": "Calculations"
                   }
                 },
                 "Property": "Total Sales Amount"
@@ -104,7 +104,7 @@
                         "Measure": {
                           "Expression": {
                             "SourceRef": {
-                              "Entity": "Sales"
+                              "Entity": "Calculations"
                             }
                           },
                           "Property": "Total Sales Amount"

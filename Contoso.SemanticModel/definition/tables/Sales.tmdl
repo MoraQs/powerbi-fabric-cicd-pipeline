@@ -1,315 +1,132 @@
 table Sales
-	lineageTag: e6f6669e-a253-41f8-b987-301fa5cf54a3
+	lineageTag: fadd0681-8450-4826-b80d-49136a3e27d2
 
-	measure 'Total Quatity' = SUM('Sales'[Sales Quantity])
-		formatString: #,0
-		lineageTag: 0067fd0c-70d3-48fb-a5fd-d1a9d760c074
-
-	measure 'Total Sales Amount' = SUMX( 'Sales', 'Sales'[Unit Price] * ('Sales'[Sales Quantity] - 'Sales'[Return Quantity] - 'Sales'[Discount Quantity]) )
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: 88a8133b-a5c6-4035-9898-92fc1fe483e8
-
-	measure Profit = SUMX( 'Sales', ('Sales'[Unit Price] - 'Sales'[Unit Cost]) * ('Sales'[Sales Quantity] - 'Sales'[Return Quantity] - 'Sales'[Discount Quantity]) )
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: 9d682dd1-ce1a-4090-a0c8-f5afd1d754cc
-
-	measure 'Profit Margin' = DIVIDE([Profit], [Total Sales Amount], 0)
-		formatString: #,0.0%;-#,0.0%;#,0.0%
-		lineageTag: 347a5d7b-2e2c-429d-a253-8bda441f5355
-
-	measure 'Total Sales EF' = CALCULATE([Total Sales Amount], 'Date'[Year] = 2011, 'Date'[Quarter] = "Q4", 'Geography'[Country] = "United States")
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: 9634a635-42f1-4165-85f7-d3070ff1ea02
-
-	measure 'Sales Amount CY' = CALCULATE([Total Sales Amount], 'Date'[Year] = MAX('Date'[Year]))
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: 5a53fe61-fbf6-4fa8-9480-1048e2a91408
-
-	measure 'Sales Amount PY' = CALCULATE([Total Sales Amount], 'Date'[Year] = MAX('Date'[Year]) -1)
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: ba2a21eb-ec2e-40fa-ac5c-a492c40b7ea4
-
-	measure '% change' = DIVIDE([Sales Amount CY] - [Sales Amount PY], [Sales Amount PY])
-		formatString: #,0.0%;-#,0.0%;#,0.0%
-		lineageTag: 1f4e78da-d1a0-48c0-a0e1-42149619e6e8
-
-	measure 'Previous Day Amount' = CALCULATE([Total Sales Amount], PREVIOUSDAY('Date'[Date]))
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: acd17c1b-e40e-4d19-a63f-e3e571780ed8
-
-	measure 'DoD % change' = DIVIDE([Total Sales Amount] - [Previous Day Amount], [Previous Day Amount])
-		formatString: #,0.0%;-#,0.0%;#,0.0%
-		lineageTag: bfcd4098-8346-4563-9cd6-5c8a598cf2ec
-
-	measure 'Prev Day DA' = CALCULATE([Total Sales Amount], DATEADD('Date'[Date], -1, DAY))
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: 0c9a55ad-624d-4d26-9d09-af8664934c53
-
-	measure 'Sales SPLY' = CALCULATE([Total Sales Amount], SAMEPERIODLASTYEAR('Date'[Date]))
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: cdc2919a-41f5-49b2-a035-6a320dd9fdea
-
-	measure '% SPLY' = DIVIDE([Total Sales Amount] - [Sales SPLY], [Sales SPLY])
-		formatString: #,0.0%;-#,0.0%;#,0.0%
-		lineageTag: 4b35ae29-2dc9-4399-9abd-0baf9e558a2c
-
-	measure 'Sales Amount RF' = CALCULATE( [Total Sales Amount], ALLSELECTED() )
-		formatString: #,0
-		lineageTag: a5f63983-3f03-418d-aaed-0d8600acaa08
-
-	measure '% GrandTotal' = DIVIDE( [Total Sales Amount], [Sales Amount RF] )
-		formatString: #,0.0%;-#,0.0%;#,0.0%
-		lineageTag: e9883904-c216-4d9a-8c73-3dae5720623f
-
-	measure 'Sales Amount Related' = ```
-			SUMX( Sales, (Sales[Sales Quantity] - Sales[Return Quantity] -Sales[Discount Quantity] ) * RELATED('Product'[Unit Price]) )
-			
-			
-			```
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: 5a7ddfef-7a3d-45ba-900e-6c064d369317
-
-	measure Var1 = ```
-			
-			
-			VAR __salesAmount = [Total Sales Amount] 
-			
-			VAR __totalProfit = [Profit]
-			
-			VAR __profitMargin = DIVIDE( __totalProfit , __salesAmount )
-			
-			RETURN __salesAmount
-			```
-		formatString: #,0
-		lineageTag: 991177c0-c49a-4ae3-977e-228e57e56644
-
-	measure 'CY vs PY' = ```
-			
-			
-			VAR __selectedYear = SELECTEDVALUE('Date'[Year])
-			
-			VAR __CYsales = 
-			
-			    CALCULATE(
-			        [Total Sales Amount],
-			        'Date'[Year] = __selectedYear
-			    )
-			
-			VAR __PYsales = 
-			    CALCULATE(
-			        [Total Sales Amount],
-			        'Date'[Year] = __selectedYear -1
-			    )
-			
-			VAR __percendiff = DIVIDE (__CYsales - __PYsales, __PYsales)
-			
-			RETURN __percendiff
-			```
-		formatString: #,0.0%;-#,0.0%;#,0.0%
-		lineageTag: 9ee6b651-260a-406f-9a31-b74ffded7163
-
-	measure 'SelectedV vs max' =
-			
-			
-			VAR _selectedValue = SELECTEDVALUE('Date'[Year])
-			
-			VAR _max = MAX('Date'[Year])
-			
-			RETURN _max
-		formatString: #,0
-		lineageTag: bbe28271-72e5-472b-a325-314f13d10098
-
-	measure 'Sales YTD' = CALCULATE([Total Sales Amount], DATESYTD('Date'[Date]))
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: 72642fe1-d0f5-47fd-a070-c2125eae7dd8
-
-	measure 'Sales YTD 2' = TOTALYTD([Total Sales Amount], 'Date'[Date])
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: f30f6908-e332-4c55-a63d-e134c015f905
-
-	measure Ranking =
-			
-			RANKX(
-			    ALL('Product'[Brand Name]),
-			    [Total Sales Amount],,DESC,Skip
-			)
-		formatString: #,0
-		lineageTag: 014b2172-d330-4dd9-8ed7-59abe9c6b451
-
-	measure 'Sales Amount AllExcept' =
-			
-			
-			CALCULATE(
-			    [Total Sales Amount],
-			    ALLEXCEPT(Sales, 'Date'[Month], Channel[Channel Name], 'Product'[Brand Name])
-			)
-		formatString: #,0
-		lineageTag: d66ff263-9e1b-43d6-ba06-f2e5a37cd7d4
-
-	column SalesKey
-		dataType: string
-		lineageTag: c6819754-01ff-4f4f-9d06-f706359ee00f
-		summarizeBy: none
-		sourceColumn: SalesKey
-
-		changedProperty = IsHidden
+	column saleskey
+		dataType: int64
+		formatString: 0
+		lineageTag: f266e825-ea39-47d0-ab11-5b9b6eaeaa68
+		summarizeBy: sum
+		sourceColumn: saleskey
 
 		annotation SummarizationSetBy = Automatic
 
-	column Date
+	column date
 		dataType: dateTime
-		formatString: Short Date
-		lineageTag: a0fcfce8-9b67-4c5d-a8f3-ebefc4d04b43
+		formatString: General Date
+		lineageTag: d2f37868-5183-4627-a043-c974c311f7a1
 		summarizeBy: none
-		sourceColumn: Date
-
-		changedProperty = DataType
+		sourceColumn: date
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
-	column channelKey
-		dataType: string
-		isHidden
-		lineageTag: 55036ff3-97ec-4a94-802f-53aa7553151b
+	column channelkey
+		dataType: int64
+		formatString: 0
+		lineageTag: dcdd4df8-c742-4ea4-83c9-87393e3c9cc2
 		summarizeBy: none
-		sourceColumn: channelKey
-
-		changedProperty = IsHidden
+		sourceColumn: channelkey
 
 		annotation SummarizationSetBy = Automatic
 
-	column StoreKey
-		dataType: string
-		isHidden
-		lineageTag: 866cab04-631b-42f7-b79f-8b674d91dc6e
+	column storekey
+		dataType: int64
+		formatString: 0
+		lineageTag: 732b3b21-b4b4-4f7d-b18f-3d23cec61b1b
 		summarizeBy: none
-		sourceColumn: StoreKey
-
-		changedProperty = IsHidden
+		sourceColumn: storekey
 
 		annotation SummarizationSetBy = Automatic
 
-	column ProductKey
-		dataType: string
-		isHidden
-		lineageTag: 8f5ec267-3311-4ae8-82e5-96e497995481
+	column productkey
+		dataType: int64
+		formatString: 0
+		lineageTag: 67ebbaf5-bd9d-4ced-a674-de17043b0eed
 		summarizeBy: none
-		sourceColumn: ProductKey
-
-		changedProperty = IsHidden
+		sourceColumn: productkey
 
 		annotation SummarizationSetBy = Automatic
 
-	column PromotionKey
-		dataType: string
-		isHidden
-		lineageTag: bc613c64-1fd6-4ad4-9c09-ec1a07eabde0
+	column promotionkey
+		dataType: int64
+		formatString: 0
+		lineageTag: 9e2d0209-ca43-4228-ab74-c8fa06ed1625
 		summarizeBy: none
-		sourceColumn: PromotionKey
-
-		changedProperty = IsHidden
+		sourceColumn: promotionkey
 
 		annotation SummarizationSetBy = Automatic
 
 	column 'Unit Cost'
-		dataType: int64
-		isHidden
-		formatString: 0
-		lineageTag: 81ab78e6-cbdd-49a2-b913-c530c0934a27
-		summarizeBy: none
+		dataType: double
+		lineageTag: 8f7defec-dd63-402c-8164-b07c77036441
+		summarizeBy: sum
 		sourceColumn: Unit Cost
 
-		changedProperty = IsHidden
+		annotation SummarizationSetBy = Automatic
 
-		annotation SummarizationSetBy = User
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column 'Unit Price'
-		dataType: int64
-		isHidden
-		formatString: 0
-		lineageTag: 8ce9cab2-6b12-4fc5-ab94-4652ad633783
-		summarizeBy: none
+		dataType: double
+		lineageTag: b1ea3f29-976a-46ae-be2d-8e2e6ada6554
+		summarizeBy: sum
 		sourceColumn: Unit Price
 
-		changedProperty = IsHidden
+		annotation SummarizationSetBy = Automatic
 
-		annotation SummarizationSetBy = User
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column 'Sales Quantity'
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 4d50dfc5-fe0e-4b79-acf0-1c79a3897289
-		summarizeBy: none
+		lineageTag: 3719e373-451d-4d11-b4ae-0eed227024e4
+		summarizeBy: sum
 		sourceColumn: Sales Quantity
 
-		changedProperty = IsHidden
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column 'Return Quantity'
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 06895c1a-b2ce-4b6f-a7cd-272fc66b4188
-		summarizeBy: none
+		lineageTag: 4afd515d-780b-4cca-93f4-9e407e201b41
+		summarizeBy: sum
 		sourceColumn: Return Quantity
 
-		changedProperty = IsHidden
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column 'Discount Quantity'
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: bee49770-5221-4ddc-a179-0edd5bcff80d
-		summarizeBy: none
+		lineageTag: 03740376-0fbf-4763-8131-d9ea01c9c948
+		summarizeBy: sum
 		sourceColumn: Discount Quantity
 
-		changedProperty = IsHidden
+		annotation SummarizationSetBy = Automatic
 
-		annotation SummarizationSetBy = User
-
-	column GeographyKey
+	column geographykey
 		dataType: string
-		isHidden
-		lineageTag: 8f9e693a-4878-4f20-810d-9388f64006e0
+		lineageTag: 645e6da9-e774-4781-aec3-6025aef14aaa
 		summarizeBy: none
-		sourceColumn: GeographyKey
-
-		changedProperty = IsHidden
+		sourceColumn: geographykey
 
 		annotation SummarizationSetBy = Automatic
 
-	column DateClean = DATE(YEAR('Sales'[Date]), MONTH('Sales'[Date]), DAY('Sales'[Date]))
-		isHidden
+	column dateclean
+		dataType: dateTime
 		formatString: General Date
-		lineageTag: 6e6e05dc-a72c-40c1-b80c-8a79581eead0
+		lineageTag: f43d68f3-b1a5-48e9-b783-7668d2e2f98c
 		summarizeBy: none
-
-		changedProperty = IsHidden
+		sourceColumn: dateclean
 
 		annotation SummarizationSetBy = Automatic
 
-	partition Sales-1317610e-b250-49dc-b129-7d9b788b25cf = m
+	partition Sales = m
 		mode: import
 		source =
 				let
-				    Source = Csv.Document(File.Contents("C:\Users\tunde\OneDrive\Desktop\Contoso Data\Sales.csv"),[Delimiter=",", Columns=13, Encoding=1252, QuoteStyle=QuoteStyle.None]),
-				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
-				    #"Merged Queries" = Table.NestedJoin(#"Promoted Headers", {"Store Key"}, Stores, {"StoreKey"}, "Stores", JoinKind.LeftOuter),
-				    #"Expanded Stores" = Table.ExpandTableColumn(#"Merged Queries", "Stores", {"GeographyKey"}, {"GeographyKey"}),
-				    #"Changed Type" = Table.TransformColumnTypes(#"Expanded Stores",{{"Date Key", type datetime}}),
-				    #"Extracted Date" = Table.TransformColumns(#"Changed Type",{{"Date Key", DateTime.Date, type date}}),
-				    #"Renamed Columns" = Table.RenameColumns(#"Extracted Date",{{"GeographyKey", "Geography Key"}}),
-				    #"Removed Columns" = Table.RemoveColumns(#"Renamed Columns",{"Return Amount", "Discount Amount"}),
-				    #"Renamed Columns1" = Table.RenameColumns(#"Removed Columns",{{"Sales Key", "SalesKey"}, {"Date Key", "Date"}, {"channel Key", "channelKey"}, {"Store Key", "StoreKey"}, {"Product Key", "ProductKey"}, {"Promotion Key", "PromotionKey"}, {"Geography Key", "GeographyKey"}}),
-				    #"Changed Type1" = Table.TransformColumnTypes(#"Renamed Columns1",{{"Unit Cost", Int64.Type}, {"Unit Price", Int64.Type}, {"Sales Quantity", Int64.Type}, {"Return Quantity", Int64.Type}, {"Discount Quantity", Int64.Type}})
+				    Source = PostgreSQL.Database("localhost", "contoso_db"),
+				    public_sales = Source{[Schema="public",Item="sales"]}[Data]
 				in
-				    #"Changed Type1"
+				    public_sales
 
 	annotation PBI_NavigationStepName = Navigation
 

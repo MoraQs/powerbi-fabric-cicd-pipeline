@@ -30,7 +30,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Total Quatity"
@@ -55,7 +55,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Total Sales Amount"
@@ -75,7 +75,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Total Sales Amount"
@@ -95,7 +95,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Profit Margin"
@@ -115,7 +115,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Profit Margin"
@@ -135,7 +135,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Profit"
@@ -155,7 +155,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Profit"
@@ -229,7 +229,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Total Sales Amount"
@@ -323,7 +323,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Total Sales Amount"
@@ -343,7 +343,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Total Sales Amount"
@@ -438,7 +438,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Total Sales Amount"
@@ -458,7 +458,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Total Sales Amount"
@@ -567,7 +567,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Total Sales Amount"
@@ -582,7 +582,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Total Quatity"
@@ -597,7 +597,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Profit Margin"
@@ -617,7 +617,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Total Sales Amount"
@@ -766,7 +766,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Total Sales Amount"
@@ -786,7 +786,7 @@
                     "Measure": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "Sales"
+                          "Entity": "Calculations"
                         }
                       },
                       "Property": "Total Sales Amount"

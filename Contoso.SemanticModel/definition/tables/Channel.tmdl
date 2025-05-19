@@ -1,34 +1,31 @@
 table Channel
-	lineageTag: a3afefbb-b0f5-426e-9118-1afa03e89183
+	lineageTag: 94e9f9c8-b0c9-4731-8c50-ef071b34417c
 
 	column 'Channel ID'
-		dataType: string
-		isKey
-		lineageTag: b3e0cf46-ac1a-4b38-820e-078cf1adc1ea
+		dataType: int64
+		formatString: 0
+		lineageTag: fb0c3d87-710d-4bfe-a80d-3ca2b3629ad5
 		summarizeBy: none
 		sourceColumn: Channel ID
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column 'Channel Name'
 		dataType: string
-		lineageTag: aa8338b9-248f-4841-930f-8584e9a3bbc2
+		lineageTag: e5024df3-c57e-43b0-a25a-7508eceba987
 		summarizeBy: none
 		sourceColumn: Channel Name
 
 		annotation SummarizationSetBy = Automatic
 
-	partition Channel-eaf70083-2f1b-456a-84cd-a611fd2056c5 = m
+	partition Channel = m
 		mode: import
 		source =
 				let
-				    Source = Csv.Document(File.Contents("C:\Users\tunde\OneDrive\Desktop\Contoso Data\Channel.csv"),[Delimiter=",", Columns=2, Encoding=1252, QuoteStyle=QuoteStyle.None]),
-				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
-				    #"Renamed Columns" = Table.RenameColumns(#"Promoted Headers",{{"ChannelName", "Channel Name"}, {"Channel", "Channel ID"}})
+				    Source = PostgreSQL.Database("localhost", "contoso_db"),
+				    public_channels = Source{[Schema="public",Item="channels"]}[Data]
 				in
-				    #"Renamed Columns"
+				    public_channels
 
 	annotation PBI_NavigationStepName = Navigation
 

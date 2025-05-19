@@ -1,21 +1,18 @@
 table Geography
-	lineageTag: b93aee6c-b840-4064-8da5-e699c4df630b
+	lineageTag: 5488dc65-3721-4dc0-8f4d-e3e509e593ca
 
-	column GeographyKey
-		dataType: string
-		isHidden
-		isKey
-		lineageTag: c75530d9-12ea-440c-9a24-8cb5dde34040
+	column geographykey
+		dataType: int64
+		formatString: 0
+		lineageTag: da479c89-a697-452d-b049-3d7e0dc3daa3
 		summarizeBy: none
-		sourceColumn: GeographyKey
-
-		changedProperty = IsHidden
+		sourceColumn: geographykey
 
 		annotation SummarizationSetBy = Automatic
 
 	column 'Geography Type'
 		dataType: string
-		lineageTag: 92b15185-f142-4253-8ab2-82adcc67b32a
+		lineageTag: 8ec04f05-7a28-4f92-9b22-e813b998e836
 		summarizeBy: none
 		sourceColumn: Geography Type
 
@@ -23,33 +20,28 @@ table Geography
 
 	column 'Continent Name'
 		dataType: string
-		lineageTag: 10b603bf-82ef-45d6-8b46-aa654700448a
-		dataCategory: Continent
+		lineageTag: 017d8900-38be-4e96-a02c-c47dc28ad592
 		summarizeBy: none
 		sourceColumn: Continent Name
 
 		annotation SummarizationSetBy = Automatic
 
-	column Country
+	column country
 		dataType: string
-		lineageTag: 833a56ed-5e26-4d14-aef6-a9c3ffea3d07
-		dataCategory: Country
+		lineageTag: 49023bf8-0fcb-4155-a3fe-826b351b6229
 		summarizeBy: none
-		sourceColumn: Country
+		sourceColumn: country
 
 		annotation SummarizationSetBy = Automatic
 
-	partition Geography-bc066b86-4713-4798-a67d-e17304656609 = m
+	partition Geography = m
 		mode: import
 		source =
 				let
-				    Source = Csv.Document(File.Contents("C:\Users\tunde\OneDrive\Desktop\Contoso Data\Geography.csv"),[Delimiter=",", Columns=4, Encoding=1252, QuoteStyle=QuoteStyle.None]),
-				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
-				    #"Replaced Value" = Table.ReplaceValue(#"Promoted Headers","",null,Replacer.ReplaceValue,{"RegionCountryName"}),
-				    #"Filled Down" = Table.FillDown(#"Replaced Value",{"RegionCountryName"}),
-				    #"Renamed Columns" = Table.RenameColumns(#"Filled Down",{{"ContinentName", "Continent Name"}, {"RegionCountryName", "Country"}, {"GeographyType", "Geography Type"}})
+				    Source = PostgreSQL.Database("localhost", "contoso_db"),
+				    public_geography = Source{[Schema="public",Item="geography"]}[Data]
 				in
-				    #"Renamed Columns"
+				    public_geography
 
 	annotation PBI_NavigationStepName = Navigation
 
