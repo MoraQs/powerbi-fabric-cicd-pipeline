@@ -14,11 +14,11 @@ relationship cb323fef-2a7c-4216-8576-99eb74189482
 	fromColumn: Sales.channelKey
 	toColumn: Channel.'Channel ID'
 
-relationship 799d29f9-38b9-871d-da80-310b53922272
-	fromColumn: Sales.Date
-	toColumn: Date.Date
-
 relationship 1bd6f65c-2ec4-7f88-132a-9b42e39d0bb8
 	fromColumn: Sales.ProductKey
 	toColumn: Product.ProductKey
+
+relationship 1af16fbb-192d-2caa-9955-e336d71de608
+	fromColumn: Sales.DateClean
+	toColumn: Date.Date
 

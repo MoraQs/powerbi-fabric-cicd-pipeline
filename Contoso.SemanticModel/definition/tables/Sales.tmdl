@@ -167,6 +167,8 @@ table Sales
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column channelKey
 		dataType: string
 		lineageTag: 55036ff3-97ec-4a94-802f-53aa7553151b
@@ -259,6 +261,13 @@ table Sales
 		sourceColumn: GeographyKey
 
 		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DateClean = DATE(YEAR('Sales'[Date]), MONTH('Sales'[Date]), DAY('Sales'[Date]))
+		formatString: General Date
+		lineageTag: 6e6e05dc-a72c-40c1-b80c-8a79581eead0
+		summarizeBy: none
 
 		annotation SummarizationSetBy = Automatic
 

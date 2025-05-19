@@ -12,6 +12,8 @@ table Date
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column Year = YEAR('Date'[Date])
 		formatString: 0
 		lineageTag: 18bae2ea-7971-4b17-afde-7a49a6516c1c
