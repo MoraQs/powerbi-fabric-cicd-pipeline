@@ -1,7 +1,8 @@
 {
   "version": "1.0.0",
   "tabOrder": [
-    "Script 1"
+    "Script 1",
+    "Script 2"
   ],
-  "defaultTab": "Script 1"
+  "defaultTab": "Script 2"
 }

@@ -211,7 +211,7 @@ table Sales
 		dataType: int64
 		formatString: 0
 		lineageTag: 81ab78e6-cbdd-49a2-b913-c530c0934a27
-		summarizeBy: average
+		summarizeBy: none
 		sourceColumn: Unit Cost
 
 		annotation SummarizationSetBy = User
@@ -220,7 +220,7 @@ table Sales
 		dataType: int64
 		formatString: 0
 		lineageTag: 8ce9cab2-6b12-4fc5-ab94-4652ad633783
-		summarizeBy: average
+		summarizeBy: none
 		sourceColumn: Unit Price
 
 		annotation SummarizationSetBy = User
@@ -229,28 +229,28 @@ table Sales
 		dataType: int64
 		formatString: 0
 		lineageTag: 4d50dfc5-fe0e-4b79-acf0-1c79a3897289
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: Sales Quantity
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Return Quantity'
 		dataType: int64
 		formatString: 0
 		lineageTag: 06895c1a-b2ce-4b6f-a7cd-272fc66b4188
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: Return Quantity
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Discount Quantity'
 		dataType: int64
 		formatString: 0
 		lineageTag: bee49770-5221-4ddc-a179-0edd5bcff80d
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: Discount Quantity
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column GeographyKey
 		dataType: string
