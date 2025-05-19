@@ -12,14 +12,17 @@ table Sales
 
 	column date
 		dataType: dateTime
-		formatString: m/d/yyyy h:nn:ss AM/PM
+		isHidden
+		formatString: Long Date
 		lineageTag: d2f37868-5183-4627-a043-c974c311f7a1
 		summarizeBy: none
 		sourceColumn: date
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
-		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+		annotation UnderlyingDateTimeDataType = Date
 
 	column channelkey
 		dataType: int64
@@ -40,6 +43,7 @@ table Sales
 		lineageTag: 732b3b21-b4b4-4f7d-b18f-3d23cec61b1b
 		summarizeBy: none
 		sourceColumn: storekey
+		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -52,6 +56,7 @@ table Sales
 		lineageTag: 67ebbaf5-bd9d-4ced-a674-de17043b0eed
 		summarizeBy: none
 		sourceColumn: productkey
+		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -64,6 +69,7 @@ table Sales
 		lineageTag: 9e2d0209-ca43-4228-ab74-c8fa06ed1625
 		summarizeBy: none
 		sourceColumn: promotionkey
+		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -75,6 +81,7 @@ table Sales
 		lineageTag: 8f7defec-dd63-402c-8164-b07c77036441
 		summarizeBy: none
 		sourceColumn: Unit Cost
+		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -88,6 +95,7 @@ table Sales
 		lineageTag: b1ea3f29-976a-46ae-be2d-8e2e6ada6554
 		summarizeBy: none
 		sourceColumn: Unit Price
+		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -102,6 +110,7 @@ table Sales
 		lineageTag: 3719e373-451d-4d11-b4ae-0eed227024e4
 		summarizeBy: none
 		sourceColumn: Sales Quantity
+		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -114,6 +123,7 @@ table Sales
 		lineageTag: 4afd515d-780b-4cca-93f4-9e407e201b41
 		summarizeBy: none
 		sourceColumn: Return Quantity
+		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
@@ -135,24 +145,11 @@ table Sales
 		lineageTag: 645e6da9-e774-4781-aec3-6025aef14aaa
 		summarizeBy: none
 		sourceColumn: geographykey
+		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
-
-	column dateclean
-		dataType: dateTime
-		isHidden
-		formatString: m/d/yyyy h:nn:ss AM/PM
-		lineageTag: f43d68f3-b1a5-48e9-b783-7668d2e2f98c
-		summarizeBy: none
-		sourceColumn: dateclean
-
-		changedProperty = IsHidden
-
-		annotation SummarizationSetBy = Automatic
-
-		annotation PBI_FormatHint = {"isDateTimeCustom":true}
 
 	partition Sales = m
 		mode: import
@@ -160,9 +157,10 @@ table Sales
 				let
 				    Source = PostgreSQL.Database("localhost", "contoso_db"),
 				    public_sales = Source{[Schema="public",Item="sales"]}[Data],
-				    #"Changed Type" = Table.TransformColumnTypes(public_sales,{{"geographykey", Int64.Type}, {"Unit Cost", Currency.Type}, {"Unit Price", Currency.Type}})
+				    #"Changed Type" = Table.TransformColumnTypes(public_sales,{{"geographykey", Int64.Type}, {"Unit Cost", Currency.Type}, {"Unit Price", Currency.Type}, {"date", type date}}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Changed Type",{"saleskey", "date", "channelkey", "storekey", "productkey", "promotionkey", "Unit Cost", "Unit Price", "Sales Quantity", "Return Quantity", "Discount Quantity", "geographykey"})
 				in
-				    #"Changed Type"
+				    #"Removed Other Columns"
 
 	annotation PBI_NavigationStepName = Navigation
 
