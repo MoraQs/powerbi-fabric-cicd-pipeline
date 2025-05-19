@@ -14,7 +14,7 @@ table Sales
 		lineageTag: 9d682dd1-ce1a-4090-a0c8-f5afd1d754cc
 
 	measure 'Profit Margin' = DIVIDE([Profit], [Total Sales Amount], 0)
-		formatString: 0.00%;-0.00%;0.00%
+		formatString: #,0.0%;-#,0.0%;#,0.0%
 		lineageTag: 347a5d7b-2e2c-429d-a253-8bda441f5355
 
 	measure 'Total Sales EF' = CALCULATE([Total Sales Amount], 'Date'[Year] = 2011, 'Date'[Quarter] = "Q4", 'Geography'[Country] = "United States")
@@ -30,7 +30,7 @@ table Sales
 		lineageTag: ba2a21eb-ec2e-40fa-ac5c-a492c40b7ea4
 
 	measure '% change' = DIVIDE([Sales Amount CY] - [Sales Amount PY], [Sales Amount PY])
-		formatString: 0.00%;-0.00%;0.00%
+		formatString: #,0.0%;-#,0.0%;#,0.0%
 		lineageTag: 1f4e78da-d1a0-48c0-a0e1-42149619e6e8
 
 	measure 'Previous Day Amount' = CALCULATE([Total Sales Amount], PREVIOUSDAY('Date'[Date]))
@@ -38,7 +38,7 @@ table Sales
 		lineageTag: acd17c1b-e40e-4d19-a63f-e3e571780ed8
 
 	measure 'DoD % change' = DIVIDE([Total Sales Amount] - [Previous Day Amount], [Previous Day Amount])
-		formatString: 0.00%;-0.00%;0.00%
+		formatString: #,0.0%;-#,0.0%;#,0.0%
 		lineageTag: bfcd4098-8346-4563-9cd6-5c8a598cf2ec
 
 	measure 'Prev Day DA' = CALCULATE([Total Sales Amount], DATEADD('Date'[Date], -1, DAY))
@@ -50,15 +50,15 @@ table Sales
 		lineageTag: cdc2919a-41f5-49b2-a035-6a320dd9fdea
 
 	measure '% SPLY' = DIVIDE([Total Sales Amount] - [Sales SPLY], [Sales SPLY])
-		formatString: 0.00%;-0.00%;0.00%
+		formatString: #,0.0%;-#,0.0%;#,0.0%
 		lineageTag: 4b35ae29-2dc9-4399-9abd-0baf9e558a2c
 
 	measure 'Sales Amount RF' = CALCULATE( [Total Sales Amount], ALLSELECTED() )
-		formatString: 0
+		formatString: #,0
 		lineageTag: a5f63983-3f03-418d-aaed-0d8600acaa08
 
 	measure '% GrandTotal' = DIVIDE( [Total Sales Amount], [Sales Amount RF] )
-		formatString: 0.00%;-0.00%;0.00%
+		formatString: #,0.0%;-#,0.0%;#,0.0%
 		lineageTag: e9883904-c216-4d9a-8c73-3dae5720623f
 
 	measure 'Sales Amount Related' = ```
@@ -80,7 +80,7 @@ table Sales
 			
 			RETURN __salesAmount
 			```
-		formatString: 0
+		formatString: #,0
 		lineageTag: 991177c0-c49a-4ae3-977e-228e57e56644
 
 	measure 'CY vs PY' = ```
@@ -105,7 +105,7 @@ table Sales
 			
 			RETURN __percendiff
 			```
-		formatString: 0.00%;-0.00%;0.00%
+		formatString: #,0.0%;-#,0.0%;#,0.0%
 		lineageTag: 9ee6b651-260a-406f-9a31-b74ffded7163
 
 	measure 'SelectedV vs max' =
@@ -116,7 +116,7 @@ table Sales
 			VAR _max = MAX('Date'[Year])
 			
 			RETURN _max
-		formatString: 0
+		formatString: #,0
 		lineageTag: bbe28271-72e5-472b-a325-314f13d10098
 
 	measure 'Sales YTD' = CALCULATE([Total Sales Amount], DATESYTD('Date'[Date]))
@@ -133,7 +133,7 @@ table Sales
 			    ALL('Product'[Brand Name]),
 			    [Total Sales Amount],,DESC,Skip
 			)
-		formatString: 0
+		formatString: #,0
 		lineageTag: 014b2172-d330-4dd9-8ed7-59abe9c6b451
 
 	measure 'Sales Amount AllExcept' =
@@ -143,7 +143,7 @@ table Sales
 			    [Total Sales Amount],
 			    ALLEXCEPT(Sales, 'Date'[Month], Channel[Channel Name], 'Product'[Brand Name])
 			)
-		formatString: 0
+		formatString: #,0
 		lineageTag: d66ff263-9e1b-43d6-ba06-f2e5a37cd7d4
 
 	column SalesKey

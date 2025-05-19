@@ -3,7 +3,6 @@ table Stores
 
 	column StoreKey
 		dataType: string
-		isHidden
 		lineageTag: 8848a941-216a-48e6-9374-ea3dc181cf42
 		summarizeBy: none
 		sourceColumn: StoreKey
@@ -14,7 +13,6 @@ table Stores
 
 	column GeographyKey
 		dataType: string
-		isHidden
 		lineageTag: efb09bce-5f3f-4c89-b74f-1502784f20dc
 		summarizeBy: none
 		sourceColumn: GeographyKey

@@ -81,10 +81,10 @@
           "nodeIndex": "Stores",
           "nodeLineageTag": "8350c261-e5c2-4899-a7c4-ad298cd1d4a0",
           "size": {
-            "height": 176.54723640121676,
+            "height": 217.79723640121676,
             "width": 234
           },
-          "zIndex": 7
+          "zIndex": 8
         },
         {
           "location": {
@@ -110,7 +110,7 @@
             "height": 200,
             "width": 234
           },
-          "zIndex": 8
+          "zIndex": 7
         }
       ],
       "name": "All tables",

@@ -3,7 +3,6 @@ table Promotion
 
 	column 'Promotion Key'
 		dataType: string
-		isHidden
 		isKey
 		lineageTag: d274bde8-56ee-45aa-8a03-2a5ee5a31600
 		summarizeBy: none

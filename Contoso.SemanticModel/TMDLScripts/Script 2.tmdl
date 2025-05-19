@@ -1,0 +1,91 @@
+createOrReplace
+
+	table Stores
+		lineageTag: 8350c261-e5c2-4899-a7c4-ad298cd1d4a0
+
+		column StoreKey
+			dataType: string
+			lineageTag: 8848a941-216a-48e6-9374-ea3dc181cf42
+			summarizeBy: none
+			sourceColumn: StoreKey
+			isAvailableInMdx: false
+
+			changedProperty = IsHidden
+
+			annotation SummarizationSetBy = Automatic
+
+		column GeographyKey
+			dataType: string
+			lineageTag: efb09bce-5f3f-4c89-b74f-1502784f20dc
+			summarizeBy: none
+			sourceColumn: GeographyKey
+			isAvailableInMdx: false
+
+			changedProperty = IsHidden
+
+			annotation SummarizationSetBy = Automatic
+
+		column 'Store Type'
+			dataType: string
+			lineageTag: d1bb0b0a-cbf3-4a86-ba1f-7617e1fec42d
+			summarizeBy: none
+			sourceColumn: Store Type
+
+			annotation SummarizationSetBy = Automatic
+
+		column 'Store Name'
+			dataType: string
+			lineageTag: 76788094-58f7-4f58-ac7a-c6546e373e0e
+			summarizeBy: none
+			sourceColumn: Store Name
+
+			annotation SummarizationSetBy = Automatic
+
+		column Status
+			dataType: string
+			lineageTag: 5d6a4c38-8158-4f41-ac4a-106f05d8f65a
+			summarizeBy: none
+			sourceColumn: Status
+
+			annotation SummarizationSetBy = Automatic
+
+		column 'Close Reason'
+			dataType: string
+			lineageTag: 86da730c-6a87-406f-af6b-fa66cdc3a683
+			summarizeBy: none
+			sourceColumn: Close Reason
+
+			annotation SummarizationSetBy = Automatic
+
+		column 'Employee Count'
+			dataType: string
+			lineageTag: 2828f93d-fe2b-41af-b441-b1cc289bd103
+			summarizeBy: none
+			sourceColumn: Employee Count
+
+			annotation SummarizationSetBy = Automatic
+
+		column 'Selling Area Size'
+			dataType: string
+			lineageTag: ab22031b-18fb-4425-b6f5-a94cd05fb306
+			summarizeBy: none
+			sourceColumn: Selling Area Size
+
+			annotation SummarizationSetBy = Automatic
+
+		partition Stores-175c0704-c85f-41ee-a0bb-cb52f5320d20 = m
+			mode: import
+			source =
+					let
+					    Source = Csv.Document(File.Contents("C:\Users\tunde\OneDrive\Desktop\Contoso Data\Stores.csv"),[Delimiter=",", Columns=8, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+					    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+					    #"Filtered Rows" = Table.SelectRows(#"Promoted Headers", each [EmployeeCount] <> null and [EmployeeCount] <> ""),
+					    #"Replaced Value" = Table.ReplaceValue(#"Filtered Rows","","No Reason",Replacer.ReplaceValue,{"CloseReason"}),
+					    #"Renamed Columns" = Table.RenameColumns(#"Replaced Value",{{"StoreKey", "StoreKey"}, {"SellingAreaSize", "Selling Area Size"}, {"EmployeeCount", "Employee Count"}, {"CloseReason", "Close Reason"}, {"StoreName", "Store Name"}, {"StoreType", "Store Type"}})
+					in
+					    #"Renamed Columns"
+
+		annotation PBI_NavigationStepName = Navigation
+
+		annotation PBI_ResultType = Table
+

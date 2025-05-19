@@ -1,7 +1,9 @@
 table 'Fiscal Date Table'
 	lineageTag: 7bc9971c-def4-4e9b-a052-835c0febda95
+	dataCategory: Time
 
 	column Date
+		isKey
 		formatString: Short Date
 		lineageTag: da69f7bd-0499-4c8b-a372-d13551b11147
 		summarizeBy: none

@@ -3,7 +3,6 @@ table Channel
 
 	column 'Channel ID'
 		dataType: string
-		isHidden
 		isKey
 		lineageTag: b3e0cf46-ac1a-4b38-820e-078cf1adc1ea
 		summarizeBy: none
