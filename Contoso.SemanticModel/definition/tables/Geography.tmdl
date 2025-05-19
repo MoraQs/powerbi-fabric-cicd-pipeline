@@ -3,10 +3,13 @@ table Geography
 
 	column geographykey
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: da479c89-a697-452d-b049-3d7e0dc3daa3
 		summarizeBy: none
 		sourceColumn: geographykey
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 

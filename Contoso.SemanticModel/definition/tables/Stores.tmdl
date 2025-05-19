@@ -3,10 +3,13 @@ table Stores
 
 	column storekey
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 11dbb0ed-2f73-4725-80a6-9e25cf32b61a
 		summarizeBy: none
 		sourceColumn: storekey
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 

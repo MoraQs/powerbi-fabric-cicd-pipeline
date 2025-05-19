@@ -4,7 +4,7 @@ table Date
 
 	column Date
 		isKey
-		formatString: Short Date
+		formatString: m/d/yyyy h:nn:ss AM/PM
 		lineageTag: 65b0b05c-a3fd-458b-9909-6c21b54c3445
 		summarizeBy: none
 		isNameInferred
@@ -12,7 +12,7 @@ table Date
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
 
 	column Year
 		formatString: 0

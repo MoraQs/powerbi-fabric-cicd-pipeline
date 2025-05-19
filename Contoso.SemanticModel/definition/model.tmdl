@@ -10,18 +10,19 @@ annotation PBIDesktopVersion = 2.143.878.0 (25.05)+b20aa3b866ec1b70879135a4e60e4
 
 annotation __PBI_TimeIntelligenceEnabled = 0
 
-annotation PBI_QueryOrder = ["Sales","Stores","ProductSubcategory","ProductCategory","Product","Geography","Channel","Promotion"]
+annotation PBI_QueryOrder = ["Calculations","Channel","Geography","Product","Promotion","Sales","Stores"]
 
-annotation PBI_ProTooling = ["DaxQueryView_Desktop","TMDLView_Desktop","DevMode","TMDL-Extension"]
+annotation PBI_ProTooling = ["DaxQueryView_Desktop","TMDLView_Desktop","DevMode"]
 
-ref table Sales
-ref table Stores
-ref table Product
-ref table Geography
-ref table Channel
-ref table Promotion
 ref table 'Fiscal Date Table'
 ref table Date
+ref table Calculations
+ref table Channel
+ref table Geography
+ref table Product
+ref table Promotion
+ref table Sales
+ref table Stores
 
 ref cultureInfo en-US
 
