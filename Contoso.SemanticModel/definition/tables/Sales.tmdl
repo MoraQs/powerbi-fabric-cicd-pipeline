@@ -163,9 +163,9 @@ table Sales
 		summarizeBy: none
 		sourceColumn: Date
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = DataType
 
-		annotation UnderlyingDateTimeDataType = Date
+		annotation SummarizationSetBy = Automatic
 
 	column channelKey
 		dataType: string

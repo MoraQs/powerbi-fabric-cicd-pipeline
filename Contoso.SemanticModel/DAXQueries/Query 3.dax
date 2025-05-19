@@ -1,4 +1,0 @@
-EVALUATE
-	ROW(
-	"Profit_Margin", 'Sales'[Profit Margin]
-)
