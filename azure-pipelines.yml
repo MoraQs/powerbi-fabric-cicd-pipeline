@@ -81,7 +81,7 @@ stages:
           path: 'self'
         
         - task: PowerShell@2
-          displayName: 'Download pbi-tools CLI'
+          displayName: 'Download pbi-tools CLI (Debugging)' # Added Debugging to display
           inputs:
             targetType: inline
             script: |
@@ -111,10 +111,16 @@ stages:
                 exit 1
               }
 
-              # --- MODIFIED LOGIC HERE ---
+              Write-Host "--- Listing contents of $toolPath after unzip ---"
+              Get-ChildItem -Path $toolPath -Recurse | ForEach-Object {
+                  Write-Host $_.FullName
+              }
+              Write-Host "--- End of listing ---"
+
               # Find the unzipped folder by looking for pbi-tools.exe within subdirectories
               $pbiToolsExePath = $null
-              $unzippedFolders = Get-ChildItem -Path $toolPath -Directory -Recurse 
+              # Let's search one level deeper if necessary, or just rely on the recursive search
+              $unzippedFolders = Get-ChildItem -Path $toolPath -Directory -Recurse # Keep -Recurse for robustness
 
               foreach ($folder in $unzippedFolders) {
                   $potentialExePath = Join-Path -Path $folder.FullName -ChildPath "pbi-tools.exe"
@@ -125,15 +131,13 @@ stages:
               }
 
               if (-not $pbiToolsExePath) {
-                Write-Error "pbi-tools.exe not found in any subfolder of $toolPath after unzip!"
+                Write-Error "pbi-tools.exe not found in any subfolder of $toolPath after unzip! Please check the output above for the folder structure."
                 exit 1
               }
-              # --- END MODIFIED LOGIC ---
 
               Write-Host "pbi-tools.exe found at: $pbiToolsExePath"
               Write-Host "pbi-tools is ready."
 
-              # Set a pipeline variable for easy access in subsequent tasks
               Write-Host "##vso[task.setvariable variable=PbiToolsExePath]$pbiToolsExePath"
 
 
