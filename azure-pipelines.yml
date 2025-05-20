@@ -81,7 +81,7 @@ stages:
           path: 'self'
         
         - task: PowerShell@2
-          displayName: 'Download pbi-tools CLI (Debugging)' # Added Debugging to display
+          displayName: 'Download pbi-tools CLI' # Removed Debugging from display name
           inputs:
             targetType: inline
             script: |
@@ -104,6 +104,8 @@ stages:
               }
 
               try {
+                # Expand the archive directly into the $toolPath.
+                # Based on your logs, the executables are directly within the unzipped root.
                 Expand-Archive -Path $tempZipPath -DestinationPath $toolPath -Force -ErrorAction Stop
                 Write-Host "Unzipped successfully."
               } catch {
@@ -111,33 +113,21 @@ stages:
                 exit 1
               }
 
-              Write-Host "--- Listing contents of $toolPath after unzip ---"
-              Get-ChildItem -Path $toolPath -Recurse | ForEach-Object {
-                  Write-Host $_.FullName
-              }
-              Write-Host "--- End of listing ---"
+              # --- CRITICAL FIX HERE ---
+              # The executable is named 'pbi-tools.core.exe' and is directly in $toolPath
+              $pbiToolsExePath = Join-Path -Path $toolPath -ChildPath "pbi-tools.core.exe"
 
-              # Find the unzipped folder by looking for pbi-tools.exe within subdirectories
-              $pbiToolsExePath = $null
-              # Let's search one level deeper if necessary, or just rely on the recursive search
-              $unzippedFolders = Get-ChildItem -Path $toolPath -Directory -Recurse # Keep -Recurse for robustness
-
-              foreach ($folder in $unzippedFolders) {
-                  $potentialExePath = Join-Path -Path $folder.FullName -ChildPath "pbi-tools.exe"
-                  if (Test-Path $potentialExePath) {
-                      $pbiToolsExePath = $potentialExePath
-                      break # Found it, exit loop
-                  }
-              }
-
-              if (-not $pbiToolsExePath) {
-                Write-Error "pbi-tools.exe not found in any subfolder of $toolPath after unzip! Please check the output above for the folder structure."
+              if (-not (Test-Path $pbiToolsExePath)) {
+                Write-Error "pbi-tools.core.exe not found at expected path: $pbiToolsExePath. Please check the zip content."
                 exit 1
               }
+              # --- END CRITICAL FIX ---
 
-              Write-Host "pbi-tools.exe found at: $pbiToolsExePath"
+              Write-Host "pbi-tools.core.exe found at: $pbiToolsExePath"
               Write-Host "pbi-tools is ready."
 
+              # Set a pipeline variable for easy access in subsequent tasks
+              # Name it for consistency, but remember it points to .core.exe
               Write-Host "##vso[task.setvariable variable=PbiToolsExePath]$pbiToolsExePath"
 
 
