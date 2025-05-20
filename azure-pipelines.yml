@@ -1,5 +1,8 @@
 trigger: none
 
+variables:
+- group: PowerBIDevelopmentVariables
+
 pool:
   name: Default
 
@@ -29,7 +32,8 @@ stages:
 
               Write-Host "##[debug]Downloading Dataset default rules"
               $downloadUrl = "https://raw.githubusercontent.com/microsoft/Analysis-Services/master/BestPracticeRules/BPARules.json"
-              Invoke-WebRequest -Uri $downloadUrl -OutFile "$tempPath\Rules-Dataset.json"     
+              Invoke-WebRequest -Uri $downloadUrl -OutFile "$tempPath\Rules-Dataset.json" 
+
         - task: PowerShell@2
           displayName: 'Run Dataset Rules'
           inputs:
@@ -70,10 +74,30 @@ stages:
                   Write-Host "##[endgroup]"
               }
 
+        - task: PublishBuildArtifacts@1
+          displayName: "Publish Contoso.pbix"
+          inputs:
+            pathToPublish: '$(Build.ArtifactStagingDirectory)\Contoso.pbix'
+            artifactName: 'pbix-drop'
+
+
     - job: Build_Reports
       steps:
         - checkout: self
           path: 'self'
+        
+        - task: PowerShell@2
+          displayName: 'Download pbi-tools CLI'
+          inputs:
+            targetType: inline
+            script: |
+              $toolPath = "$(Build.SourcesDirectory)\_tools\pbi-tools"
+              New-Item -ItemType Directory -Path $toolPath -ErrorAction SilentlyContinue | Out-Null
+
+              Write-Host "Downloading pbi-tools CLI..."
+              Invoke-WebRequest -Uri "https://github.com/pbi-tools/pbi-tools/releases/latest/download/pbi-tools-win-x64.zip" -OutFile "$toolPath\pbi-tools.zip"
+              Expand-Archive -Path "$toolPath\pbi-tools.zip" -DestinationPath $toolPath -Force
+
         - task: PowerShell@2
           displayName: 'Download PBIXInspector'
           inputs:
@@ -122,3 +146,71 @@ stages:
                       
                       Write-Host "##[endgroup]"
                   }
+
+        - task: PowerShell@2
+          displayName: 'Build .pbix from .pbip'
+          inputs:
+            targetType: inline
+            script: |
+              $pbipPath = "$(Build.SourcesDirectory)\Contoso"  # update if your PBIP folder is elsewhere
+              $outputPath = "$(Build.ArtifactStagingDirectory)\Contoso.pbix"
+              $pbiToolsPath = "$(Build.SourcesDirectory)\_tools\pbi-tools\pbi-tools.exe"
+
+              Write-Host "Building .pbix from .pbip project..."
+              & "$pbiToolsPath" build "$pbipPath" --output "$outputPath"
+
+
+ - stage: Deploy_UAT
+   dependsOn: Build
+   condition: succeeded()
+   jobs:
+    - deployment: DeployToUAT
+      displayName: 'Deploy to UAT Workspace'
+      environment: 'ContosoUAT'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - checkout: self
+
+              - task: DownloadPipelineArtifact@2
+                displayName: 'Download PBIX Artifact'
+                inputs:
+                  artifact: 'pbix-drop'
+                  path: '$(Pipeline.Workspace)/drop'
+
+              - task: PowerShell@2
+                displayName: 'Deploy Dataset and Report to UAT'
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    # Retrieve credentials from pipeline variables
+                    $clientId = "$(powerbi_client_id)"
+                    $clientSecret = "$(powerbi_client_secret)"
+                    $tenantId = "$(tenant_id)"
+                    $workspaceId = "$(uat_workspace_id)"  # Define this variable securely
+                    $datasetName = "ContosoUAT"       # Update as needed
+                    $pbixPath = "$(Pipeline.Workspace)\drop\Contoso.pbix"  # Adjust to actual artifact path
+
+                    # Authenticate to Power BI using client credentials flow
+                    $body = @{
+                      grant_type    = "client_credentials"
+                      client_id     = $clientId
+                      client_secret = $clientSecret
+                      resource      = "https://analysis.windows.net/powerbi/api"
+                    }
+
+                    Write-Host "Authenticating to Azure AD..."
+                    $tokenResponse = Invoke-RestMethod -Uri "https://login.microsoftonline.com/$tenantId/oauth2/token" -Method Post -Body $body
+                    $accessToken = $tokenResponse.access_token
+
+                    # Deploy the PBIX to UAT workspace
+                    $importUrl = "https://api.powerbi.com/v1.0/myorg/groups/$workspaceId/imports?datasetDisplayName=$datasetName&nameConflict=Overwrite"
+
+                    Write-Host "Deploying PBIX to UAT Workspace ($workspaceId)..."
+                    Invoke-RestMethod -Uri $importUrl `
+                                      -Headers @{ Authorization = "Bearer $accessToken" } `
+                                      -Method Post `
+                                      -InFile $pbixPath `
+                                      -ContentType "application/octet-stream"
+                    Write-Host "PBIX deployed successfully to UAT Workspace ($workspaceId)."
