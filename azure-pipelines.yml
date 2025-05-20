@@ -86,11 +86,10 @@ stages:
             targetType: inline
             script: |
               $toolPath = "$(Build.SourcesDirectory)\_tools\pbi-tools"
-              $tempZipPath = "$(Build.SourcesDirectory)\_temp\pbi-tools.zip" # Use a temp path for the zip file
+              $tempZipPath = "$(Build.SourcesDirectory)\_temp\pbi-tools.zip" 
               
-              # Create necessary directories
               New-Item -ItemType Directory -Path $toolPath -ErrorAction SilentlyContinue | Out-Null
-              New-Item -ItemType Directory -Path (Split-Path $tempZipPath) -ErrorAction SilentlyContinue | Out-Null # Ensure temp directory exists
+              New-Item -ItemType Directory -Path (Split-Path $tempZipPath) -ErrorAction SilentlyContinue | Out-Null 
 
               $downloadUrl = "https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_win-x64.zip"
 
@@ -105,7 +104,6 @@ stages:
               }
 
               try {
-                # Expand the archive into the $toolPath. This will likely create a subfolder.
                 Expand-Archive -Path $tempZipPath -DestinationPath $toolPath -Force -ErrorAction Stop
                 Write-Host "Unzipped successfully."
               } catch {
@@ -113,23 +111,24 @@ stages:
                 exit 1
               }
 
-              # --- IMPORTANT CHANGE STARTS HERE ---
-              # Find the actual folder created by Expand-Archive
-              # It usually extracts into a folder named after the zip's internal root, e.g., 'pbi-tools.core.1.2.0_win-x64'
-              $unzippedContent = Get-ChildItem -Path $toolPath -Directory | Where-Object { $_.Name -like "pbi-tools.core*" } | Select-Object -First 1
+              # --- MODIFIED LOGIC HERE ---
+              # Find the unzipped folder by looking for pbi-tools.exe within subdirectories
+              $pbiToolsExePath = $null
+              $unzippedFolders = Get-ChildItem -Path $toolPath -Directory -Recurse 
 
-              if (-not $unzippedContent) {
-                  Write-Error "Could not find the unzipped pbi-tools content folder (e.g., pbi-tools.core.1.2.0_win-x64) in $toolPath."
-                  exit 1
+              foreach ($folder in $unzippedFolders) {
+                  $potentialExePath = Join-Path -Path $folder.FullName -ChildPath "pbi-tools.exe"
+                  if (Test-Path $potentialExePath) {
+                      $pbiToolsExePath = $potentialExePath
+                      break # Found it, exit loop
+                  }
               }
 
-              $pbiToolsExePath = Join-Path -Path $unzippedContent.FullName -ChildPath "pbi-tools.exe"
-
-              if (-not (Test-Path $pbiToolsExePath)) {
-                Write-Error "pbi-tools.exe not found at expected path: $pbiToolsExePath"
+              if (-not $pbiToolsExePath) {
+                Write-Error "pbi-tools.exe not found in any subfolder of $toolPath after unzip!"
                 exit 1
               }
-              # --- IMPORTANT CHANGE ENDS HERE ---
+              # --- END MODIFIED LOGIC ---
 
               Write-Host "pbi-tools.exe found at: $pbiToolsExePath"
               Write-Host "pbi-tools is ready."
