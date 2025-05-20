@@ -131,22 +131,48 @@ stages:
             script: |
               $pbipPath = "$(Build.SourcesDirectory)\Contoso"  # Update this to your actual .pbip project folder
               $outputPath = "$(Build.ArtifactStagingDirectory)\Contoso.pbix"
-              # FIX: Use the pipeline variable set in the previous step within THIS SAME JOB
-              $pbiToolsPath = "$(PbiToolsExePath)" 
+              $pbiToolsPath = "$(PbiToolsExePath)" # This variable now correctly points to pbi-tools.core.exe
 
               Write-Host "Building .pbix from .pbip project..."
               Write-Host "pbi-tools executable path: $pbiToolsPath"
               Write-Host "PBIP project path: $pbipPath"
               Write-Host "Output PBIX path: $outputPath"
               
-              & "$pbiToolsPath" build "$pbipPath" --outPath "$outputPath" --overwrite
+              # Ensure the output directory exists
+              New-Item -ItemType Directory -Path (Split-Path $outputPath) -ErrorAction SilentlyContinue | Out-Null
 
-              if ($LASTEXITCODE -ne 0) {
-                  Write-Error "pbi-tools build failed with exit code $LASTEXITCODE"
+              Write-Host "##[group]Executing pbi-tools build command..."
+              # Capture standard output and standard error
+              $process = Start-Process -FilePath "$pbiToolsPath" `
+                                      -ArgumentList "build ""$pbipPath"" --outPath ""$outputPath"" --overwrite" `
+                                      -NoNewWindow -Wait -PassThru `
+                                      -RedirectStandardOutput "$env:TEMP\pbi-tools-stdout.log" `
+                                      -RedirectStandardError "$env:TEMP\pbi-tools-stderr.log"
+
+              # Read and display logs
+              $stdout = Get-Content "$env:TEMP\pbi-tools-stdout.log"
+              $stderr = Get-Content "$env:TEMP\pbi-tools-stderr.log"
+
+              Write-Host "--- pbi-tools Standard Output ---"
+              $stdout | ForEach-Object { Write-Host $_ }
+              Write-Host "--- End pbi-tools Standard Output ---"
+
+              Write-Host "--- pbi-tools Standard Error ---"
+              $stderr | ForEach-Object { Write-Host $_ }
+              Write-Host "--- End pbi-tools Standard Error ---"
+              Write-Host "##[endgroup]"
+
+              # Check the exit code of the process directly
+              $exitCode = $process.ExitCode
+              Write-Host "pbi-tools exited with code: $exitCode"
+
+              if ($exitCode -ne 0) {
+                  Write-Error "pbi-tools build failed. Check the output above for specific error messages from pbi-tools."
                   exit 1
               }
               Write-Host "Successfully built .pbix at: $outputPath"
 
+        # The PublishBuildArtifacts task remains unchanged
         - task: PublishBuildArtifacts@1
           displayName: "Publish Contoso.pbix"
           inputs:
