@@ -188,7 +188,7 @@ stages:
             script: |
               $pbipPath = "$(Build.SourcesDirectory)\Contoso"  # update if your PBIP folder is elsewhere
               $outputPath = "$(Build.ArtifactStagingDirectory)\Contoso.pbix"
-              $pbiToolsPath = "$(Build.SourcesDirectory)\_tools\pbi-tools\pbi-tools.exe"
+              $pbiToolsPath = "$(Build.SourcesDirectory)\_tools\pbi-tools\pbi-tools.core.exe"
 
               Write-Host "Building .pbix from .pbip project..."
               & "$pbiToolsPath" build "$pbipPath" --output "$outputPath"
