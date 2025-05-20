@@ -89,7 +89,7 @@ stages:
               New-Item -ItemType Directory -Path $toolPath -ErrorAction SilentlyContinue | Out-Null
 
               $zipPath = "$toolPath\pbi-tools.zip"
-              $downloadUrl = "https://github.com/pbi-tools/pbi-tools/releases/download/v1.1.1/pbi-tools.1.1.1-win-x64.zip"
+              $downloadUrl = "https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_win-x64.zip"
 
               Write-Host "Downloading from $downloadUrl to $zipPath"
 
