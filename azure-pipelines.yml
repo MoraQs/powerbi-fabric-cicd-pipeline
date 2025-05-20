@@ -214,3 +214,5 @@ stages:
                                       -InFile $pbixPath `
                                       -ContentType "application/octet-stream"
                     Write-Host "PBIX deployed successfully to UAT Workspace ($workspaceId)."
+
+## Let's see if it works
