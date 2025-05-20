@@ -186,25 +186,24 @@ stages:
           inputs:
             targetType: inline
             script: |
-              $pbipPath = "$(Build.SourcesDirectory)\Contoso"  # Update this to your actual .pbip project folder (e.g., the folder containing the 'definition' and 'report' subfolders)
+              $pbipPath = "$(Build.SourcesDirectory)\Contoso"
               $outputPath = "$(Build.ArtifactStagingDirectory)\Contoso.pbix"
               $pbiToolsPath = "$(Build.SourcesDirectory)\_tools\pbi-tools\pbi-tools.core.exe" 
 
-              Write-Host "Building .pbix from .pbip project..."
+              Write-Host "Building .pbix from .pbip project using 'compile' command..."
               Write-Host "pbi-tools executable path: $pbiToolsPath"
               Write-Host "PBIP project path: $pbipPath"
               Write-Host "Output PBIX path: $outputPath"
               
-              # FIX: Correct the 'build' command syntax based on the pbi-tools help output
-              # It takes the folder directly, followed by --outPath
-              # Added --overwrite to ensure it can overwrite if it runs multiple times
-              & "$pbiToolsPath" build "$pbipPath" --outPath "$outputPath" --overwrite
+              & "$pbiToolsPath" compile "$pbipPath" --outPath "$outputPath" --overwrite
 
               if ($LASTEXITCODE -ne 0) {
-                  Write-Error "pbi-tools build failed with exit code $LASTEXITCODE"
+                  Write-Error "pbi-tools compile failed with exit code $LASTEXITCODE"
                   exit 1
               }
-              Write-Host "Successfully built .pbix at: $outputPath"
+
+              Write-Host "Successfully compiled .pbix to: $outputPath"
+
 
         - task: PublishBuildArtifacts@1
           displayName: "Publish Contoso.pbix"
