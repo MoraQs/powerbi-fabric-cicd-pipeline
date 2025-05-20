@@ -10,7 +10,7 @@ stages:
  - stage: Build
    jobs:
 
-    - job: Build_Datasets # This job seems focused on dataset rules, keep it separate for now
+    - job: Build_Datasets
       steps:
         - checkout: self
           path: 'self'
@@ -18,17 +18,17 @@ stages:
           displayName: 'Download Tabular Editor and Default Rules'
           inputs:
             targetType: inline
-            script: |    
-              $path = "$(Build.SourcesDirectory)"            
+            script: |     
+              $path = "$(Build.SourcesDirectory)"                       
               $tempPath = "$path\_temp"
               $toolPath = "$path\_tools\TE"
-              New-Item -ItemType Directory -Path $tempPath -ErrorAction SilentlyContinue | Out-Null          
+              New-Item -ItemType Directory -Path $tempPath -ErrorAction SilentlyContinue | Out-Null              
               
               Write-Host "##[debug]Downloading Tabular Editor binaries"
               $downloadUrl = "https://github.com/TabularEditor/TabularEditor/releases/latest/download/TabularEditor.Portable.zip"
               $zipFile = "$tempPath\TabularEditor.zip"
               Invoke-WebRequest -Uri $downloadUrl -OutFile $zipFile
-              Expand-Archive -Path $zipFile -DestinationPath $toolPath -Force           
+              Expand-Archive -Path $zipFile -DestinationPath $toolPath -Force            
 
               Write-Host "##[debug]Downloading Dataset default rules"
               $downloadUrl = "https://raw.githubusercontent.com/microsoft/Analysis-Services/master/BestPracticeRules/BPARules.json"
@@ -50,10 +50,10 @@ stages:
                   $rulesPath = "$tempPath\Rules-Dataset.json"
               }
 
-              $itemsFolders = Get-ChildItem -Path $path -recurse -include ("*.pbidataset", "*.pbism")
+              $itemsFolders = Get-ChildItem  -Path $path -recurse -include ("*.pbidataset", "*.pbism")
 
               foreach($itemFolder in $itemsFolders)
-              { 
+              {	
                   $itemPath = "$($itemFolder.Directory.FullName)\definition"
 
                   if (!(Test-Path $itemPath))
@@ -75,13 +75,13 @@ stages:
               }
 
 
-    - job: Build_Reports # This job will now handle pbi-tools download AND build
+    - job: Build_Reports
       steps:
         - checkout: self
           path: 'self'
         
         - task: PowerShell@2
-          displayName: 'Download pbi-tools CLI'
+          displayName: 'Download pbi-tools CLI' # Removed Debugging from display name
           inputs:
             targetType: inline
             script: |
@@ -104,6 +104,8 @@ stages:
               }
 
               try {
+                # Expand the archive directly into the $toolPath.
+                # Based on your logs, the executables are directly within the unzipped root.
                 Expand-Archive -Path $tempZipPath -DestinationPath $toolPath -Force -ErrorAction Stop
                 Write-Host "Unzipped successfully."
               } catch {
@@ -111,77 +113,25 @@ stages:
                 exit 1
               }
 
+              # --- CRITICAL FIX HERE ---
+              # The executable is named 'pbi-tools.core.exe' and is directly in $toolPath
               $pbiToolsExePath = Join-Path -Path $toolPath -ChildPath "pbi-tools.core.exe"
 
               if (-not (Test-Path $pbiToolsExePath)) {
                 Write-Error "pbi-tools.core.exe not found at expected path: $pbiToolsExePath. Please check the zip content."
                 exit 1
               }
+              # --- END CRITICAL FIX ---
 
               Write-Host "pbi-tools.core.exe found at: $pbiToolsExePath"
               Write-Host "pbi-tools is ready."
 
+              # Set a pipeline variable for easy access in subsequent tasks
+              # Name it for consistency, but remember it points to .core.exe
               Write-Host "##vso[task.setvariable variable=PbiToolsExePath]$pbiToolsExePath"
 
-        # Moved this task here, immediately after the pbi-tools download
-        - task: PowerShell@2
-          displayName: 'Build .pbix from .pbip'
-          inputs:
-            targetType: inline
-            script: |
-              $pbipPath = "$(Build.SourcesDirectory)\Contoso"  # Update this to your actual .pbip project folder
-              $outputPath = "$(Build.ArtifactStagingDirectory)\Contoso.pbix"
-              $pbiToolsPath = "$(PbiToolsExePath)" # This variable now correctly points to pbi-tools.core.exe
 
-              Write-Host "Building .pbix from .pbip project..."
-              Write-Host "pbi-tools executable path: $pbiToolsPath"
-              Write-Host "PBIP project path: $pbipPath"
-              Write-Host "Output PBIX path: $outputPath"
-              
-              # Ensure the output directory exists
-              New-Item -ItemType Directory -Path (Split-Path $outputPath) -ErrorAction SilentlyContinue | Out-Null
 
-              Write-Host "##[group]Executing pbi-tools build command..."
-              # Capture standard output and standard error
-              $process = Start-Process -FilePath "$pbiToolsPath" `
-                                      -ArgumentList "build ""$pbipPath"" --outPath ""$outputPath"" --overwrite" `
-                                      -NoNewWindow -Wait -PassThru `
-                                      -RedirectStandardOutput "$env:TEMP\pbi-tools-stdout.log" `
-                                      -RedirectStandardError "$env:TEMP\pbi-tools-stderr.log"
-
-              # Read and display logs
-              $stdout = Get-Content "$env:TEMP\pbi-tools-stdout.log"
-              $stderr = Get-Content "$env:TEMP\pbi-tools-stderr.log"
-
-              Write-Host "--- pbi-tools Standard Output ---"
-              $stdout | ForEach-Object { Write-Host $_ }
-              Write-Host "--- End pbi-tools Standard Output ---"
-
-              Write-Host "--- pbi-tools Standard Error ---"
-              $stderr | ForEach-Object { Write-Host $_ }
-              Write-Host "--- End pbi-tools Standard Error ---"
-              Write-Host "##[endgroup]"
-
-              # Check the exit code of the process directly
-              $exitCode = $process.ExitCode
-              Write-Host "pbi-tools exited with code: $exitCode"
-
-              if ($exitCode -ne 0) {
-                  Write-Error "pbi-tools build failed. Check the output above for specific error messages from pbi-tools."
-                  exit 1
-              }
-              Write-Host "Successfully built .pbix at: $outputPath"
-
-        # The PublishBuildArtifacts task remains unchanged
-        - task: PublishBuildArtifacts@1
-          displayName: "Publish Contoso.pbix"
-          inputs:
-            pathToPublish: '$(Build.ArtifactStagingDirectory)\Contoso.pbix'
-            artifactName: 'pbix-drop'
-
-        # PBIXInspector tasks remain in this job if they also use pbi-tools output,
-        # but they don't seem to rely on the pbi-tools.core.exe path specifically.
-        # They use PBIXInspectorCLI.exe which is downloaded separately.
         - task: PowerShell@2
           displayName: 'Download PBIXInspector'
           inputs:
@@ -196,40 +146,72 @@ stages:
               $downloadUrl = "https://github.com/NatVanG/PBI-Inspector/releases/latest/download/win-x64-CLI.zip" 
               $zipFile = "$tempPath\PBIXInspector.zip"
               Invoke-WebRequest -Uri $downloadUrl -OutFile $zipFile
-              Expand-Archive -Path $zipFile -DestinationPath $toolPath -Force            
+              Expand-Archive -Path $zipFile -DestinationPath $toolPath -Force                            
 
               Write-Host "##[debug]Downloading Report default rules"
               $downloadUrl = "https://raw.githubusercontent.com/NatVanG/PBI-Inspector/main/Rules/Base-rules.json"
-              Invoke-WebRequest -Uri $downloadUrl -OutFile "$tempPath\Rules-Report.json"    
+              Invoke-WebRequest -Uri $downloadUrl -OutFile "$tempPath\Rules-Report.json"     
 
         - task: PowerShell@2
           displayName: 'Run Report Rules'
           inputs:
             targetType: inline
             script: |
-              $path = "$(Build.SourcesDirectory)"
-              $tempPath = "$path\_temp"
-              $toolPath = "$path\_Tools\PBIInspector\win-x64\CLI\PBIXInspectorCLI.exe"
-              $rulesPath = "$path\Rules-Report.json"
+                  $path = "$(Build.SourcesDirectory)"
+                  $tempPath = "$path\_temp"
+                  $toolPath =  "$path\_Tools\PBIInspector\win-x64\CLI\PBIXInspectorCLI.exe"
+                  $rulesPath = "$path\Rules-Report.json"
 
-              if (!(Test-Path $rulesPath))
-              {
-                  Write-Host "Running default downloaded rules"
-                  $rulesPath = "$tempPath\Rules-Report.json"
+                  if (!(Test-Path $rulesPath))
+                  {
+                      Write-Host "Running default downloaded rules"
+                      $rulesPath = "$tempPath\Rules-Report.json"
+                  }
+
+                  $itemsFolders = Get-ChildItem  -Path $path -recurse -include *.pbir
+
+                  foreach($itemFolder in $itemsFolders)
+                  {	
+                      $itemPath = $itemFolder.Directory.FullName
+                      
+                      Write-Host "##[group]Running rules for: '$itemPath'"
+
+                      Start-Process -FilePath "$toolPath" -ArgumentList "-pbipreport ""$itemPath"" -rules ""$rulesPath"" -formats ""ADO""" -NoNewWindow -Wait
+                      
+                      Write-Host "##[endgroup]"
+                  }
+
+        - task: PowerShell@2
+          displayName: 'Build .pbix from .pbip'
+          inputs:
+            targetType: inline
+            script: |
+              $pbipPath = "$(Build.SourcesDirectory)\Contoso"  # Update this to your actual .pbip project folder (e.g., the folder containing the 'definition' and 'report' subfolders)
+              $outputPath = "$(Build.ArtifactStagingDirectory)\Contoso.pbix"
+              $pbiToolsPath = "$(Build.SourcesDirectory)\_tools\pbi-tools\pbi-tools.core.exe" 
+
+              Write-Host "Building .pbix from .pbip project..."
+              Write-Host "pbi-tools executable path: $pbiToolsPath"
+              Write-Host "PBIP project path: $pbipPath"
+              Write-Host "Output PBIX path: $outputPath"
+              
+              # FIX: Correct the 'build' command syntax based on the pbi-tools help output
+              # It takes the folder directly, followed by --outPath
+              # Added --overwrite to ensure it can overwrite if it runs multiple times
+              & "$pbiToolsPath" build "$pbipPath" --outPath "$outputPath" --overwrite
+
+              if ($LASTEXITCODE -ne 0) {
+                  Write-Error "pbi-tools build failed with exit code $LASTEXITCODE"
+                  exit 1
               }
+              Write-Host "Successfully built .pbix at: $outputPath"
 
-              $itemsFolders = Get-ChildItem -Path $path -recurse -include *.pbir
+        - task: PublishBuildArtifacts@1
+          displayName: "Publish Contoso.pbix"
+          inputs:
+            pathToPublish: '$(Build.ArtifactStagingDirectory)\Contoso.pbix'
+            artifactName: 'pbix-drop'
 
-              foreach($itemFolder in $itemsFolders)
-              { 
-                  $itemPath = $itemFolder.Directory.FullName
-                  
-                  Write-Host "##[group]Running rules for: '$itemPath'"
-
-                  Start-Process -FilePath "$toolPath" -ArgumentList "-pbipreport ""$itemPath"" -rules ""$rulesPath"" -formats ""ADO""" -NoNewWindow -Wait
-                  
-                  Write-Host "##[endgroup]"
-              }
 
  - stage: Deploy_UAT
    dependsOn: Build
@@ -259,16 +241,16 @@ stages:
                     $clientId = "$(powerbi_client_id)"
                     $clientSecret = "$(powerbi_client_secret)"
                     $tenantId = "$(tenant_id)"
-                    $workspaceId = "$(uat_workspace_id)"    # Define this variable securely
-                    $datasetName = "ContosoUAT"      # Update as needed
-                    $pbixPath = "$(Pipeline.Workspace)\drop\Contoso.pbix"    # Adjust to actual artifact path
+                    $workspaceId = "$(uat_workspace_id)"  # Define this variable securely
+                    $datasetName = "ContosoUAT"       # Update as needed
+                    $pbixPath = "$(Pipeline.Workspace)\drop\Contoso.pbix"  # Adjust to actual artifact path
 
                     # Authenticate to Power BI using client credentials flow
                     $body = @{
-                      grant_type      = "client_credentials"
-                      client_id       = $clientId
+                      grant_type    = "client_credentials"
+                      client_id     = $clientId
                       client_secret = $clientSecret
-                      resource        = "https://analysis.windows.net/powerbi/api"
+                      resource      = "https://analysis.windows.net/powerbi/api"
                     }
 
                     Write-Host "Authenticating to Azure AD..."
@@ -285,3 +267,5 @@ stages:
                                       -InFile $pbixPath `
                                       -ContentType "application/octet-stream"
                     Write-Host "PBIX deployed successfully to UAT Workspace ($workspaceId)."
+
+## Let's see if it works
