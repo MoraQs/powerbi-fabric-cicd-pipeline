@@ -74,12 +74,6 @@ stages:
                   Write-Host "##[endgroup]"
               }
 
-        - task: PublishBuildArtifacts@1
-          displayName: "Publish Contoso.pbix"
-          inputs:
-            pathToPublish: '$(Build.ArtifactStagingDirectory)\Contoso.pbix'
-            artifactName: 'pbix-drop'
-
 
     - job: Build_Reports
       steps:
@@ -92,11 +86,36 @@ stages:
             targetType: inline
             script: |
               $toolPath = "$(Build.SourcesDirectory)\_tools\pbi-tools"
-              New-Item -ItemType Directory -Path $toolPath -ErrorAction SilentlyContinue | Out-Null
+              Write-Host "Creating tool path: $toolPath"
+              New-Item -ItemType Directory -Path $toolPath -Force -ErrorAction SilentlyContinue | Out-Null
 
-              Write-Host "Downloading pbi-tools CLI..."
-              Invoke-WebRequest -Uri "https://github.com/pbi-tools/pbi-tools/releases/latest/download/pbi-tools-win-x64.zip" -OutFile "$toolPath\pbi-tools.zip"
-              Expand-Archive -Path "$toolPath\pbi-tools.zip" -DestinationPath $toolPath -Force
+              $zipPath = "$toolPath\pbi-tools.zip"
+              $downloadUrl = "https://github.com/pbi-tools/pbi-tools/releases/latest/download/pbi-tools-win-x64.zip"
+
+              Write-Host "Downloading from $downloadUrl to $zipPath"
+
+              try {
+                Invoke-WebRequest -Uri $downloadUrl -OutFile $zipPath -UseBasicParsing -ErrorAction Stop
+                Write-Host "Download completed."
+              } catch {
+                Write-Error "Download failed: $($_.Exception.Message)"
+                exit 1
+              }
+
+              try {
+                Expand-Archive -Path $zipPath -DestinationPath $toolPath -Force -ErrorAction Stop
+                Write-Host "Unzipped successfully."
+              } catch {
+                Write-Error "Unzip failed: $($_.Exception.Message)"
+                exit 1
+              }
+
+              if (!(Test-Path "$toolPath\pbi-tools.exe")) {
+                Write-Error "pbi-tools.exe not found after unzip!"
+                exit 1
+              }
+
+              Write-Host "pbi-tools is ready."
 
         - task: PowerShell@2
           displayName: 'Download PBIXInspector'
@@ -158,6 +177,12 @@ stages:
 
               Write-Host "Building .pbix from .pbip project..."
               & "$pbiToolsPath" build "$pbipPath" --output "$outputPath"
+
+        - task: PublishBuildArtifacts@1
+          displayName: "Publish Contoso.pbix"
+          inputs:
+            pathToPublish: '$(Build.ArtifactStagingDirectory)\Contoso.pbix'
+            artifactName: 'pbix-drop'
 
 
  - stage: Deploy_UAT
