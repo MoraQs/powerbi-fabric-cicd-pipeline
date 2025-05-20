@@ -86,11 +86,10 @@ stages:
             targetType: inline
             script: |
               $toolPath = "$(Build.SourcesDirectory)\_tools\pbi-tools"
-              Write-Host "Creating tool path: $toolPath"
-              New-Item -ItemType Directory -Path $toolPath -Force -ErrorAction SilentlyContinue | Out-Null
+              New-Item -ItemType Directory -Path $toolPath -ErrorAction SilentlyContinue | Out-Null
 
               $zipPath = "$toolPath\pbi-tools.zip"
-              $downloadUrl = "https://github.com/pbi-tools/pbi-tools/releases/latest/download/pbi-tools-win-x64.zip"
+              $downloadUrl = "https://github.com/pbi-tools/pbi-tools/releases/download/v1.1.1/pbi-tools-win-x64.zip"
 
               Write-Host "Downloading from $downloadUrl to $zipPath"
 
@@ -116,6 +115,7 @@ stages:
               }
 
               Write-Host "pbi-tools is ready."
+
 
         - task: PowerShell@2
           displayName: 'Download PBIXInspector'
