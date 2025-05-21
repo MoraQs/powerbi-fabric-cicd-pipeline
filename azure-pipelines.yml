@@ -94,7 +94,6 @@ stages:
             deploy:
               steps:
                 - checkout: self
-
                 - script: |
                     "C:\Program Files\Python312\python.exe" --version
                     "C:\Program Files\Python312\python.exe" -m pip install azure-identity fabric-cicd
@@ -103,9 +102,13 @@ stages:
                 - script: |
                     "C:\Program Files\Python312\python.exe" deploy.py ^
                       --spn-auth ^
-                      --workspace "$(dev_workspace_name)" ^
+                      --workspace "$(workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
-                  displayName: 'Run $(environment_name) Deployment Script'
+                  displayName: 'Run $(environment_name) Deployment Script'                 
+                  env:
+                      FABRIC_CLIENT_ID: $(powerbi_client_id)
+                      FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
+                      FABRIC_TENANT_ID: $(tenant_id)
 
                 - script: |
                     fabric refresh ^
@@ -113,7 +116,6 @@ stages:
                       --dataset "$(dataset_name)" ^
                       --wait
                   displayName: 'Refresh $(environment_name) Semantic Model Dataset'
-
                   env:
                     FABRIC_CLIENT_ID: $(powerbi_client_id)
                     FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
@@ -141,20 +143,24 @@ stages:
             deploy:
               steps:
                 - checkout: self
+
                 - script: |
                     "C:\Program Files\Python312\python.exe" deploy.py ^
                       --spn-auth ^
                       --workspace "$(workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
-                  displayName: 'Run $(environment_name) Deployment Script'
-                
+                  displayName: 'Run $(environment_name) Deployment Script'                 
+                  env:
+                      FABRIC_CLIENT_ID: $(powerbi_client_id)
+                      FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
+                      FABRIC_TENANT_ID: $(tenant_id)
+
                 - script: |
                     fabric refresh ^
                       --workspace "$(workspace_name)" ^
                       --dataset "$(dataset_name)" ^
                       --wait
                   displayName: 'Refresh $(environment_name) Semantic Model Dataset'
-
                   env:
                     FABRIC_CLIENT_ID: $(powerbi_client_id)
                     FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
@@ -182,12 +188,17 @@ stages:
             deploy:
               steps:
                 - checkout: self
+
                 - script: |
                     "C:\Program Files\Python312\python.exe" deploy.py ^
                       --spn-auth ^
                       --workspace "$(workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
-                  displayName: 'Run $(environment_name) Deployment Script'
+                  displayName: 'Run $(environment_name) Deployment Script'                 
+                  env:
+                      FABRIC_CLIENT_ID: $(powerbi_client_id)
+                      FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
+                      FABRIC_TENANT_ID: $(tenant_id)
 
                 - script: |
                     fabric refresh ^
@@ -195,7 +206,6 @@ stages:
                       --dataset "$(dataset_name)" ^
                       --wait
                   displayName: 'Refresh $(environment_name) Semantic Model Dataset'
-
                   env:
                     FABRIC_CLIENT_ID: $(powerbi_client_id)
                     FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
