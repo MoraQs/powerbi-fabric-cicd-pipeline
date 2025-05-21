@@ -1,4 +1,4 @@
-name: 'PowerBI CI/CD Pipeline' # A meaningful name for your pipeline
+name: PowerBI-CICD-$(Date:yyyyMMdd)$(Rev:.r)
 
 # Define triggers
 trigger:
