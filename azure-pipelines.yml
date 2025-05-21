@@ -19,7 +19,6 @@ pr:
       - '**/*.Report/**'
       - '**/*.SemanticModel/**'
 
-# The manual trigger can also be configured in the Azure DevOps UI
 variables:
 - group: PowerBIDevelopmentVariables # Link your variable group for credentials
 
@@ -73,8 +72,6 @@ stages:
     displayName: 'Deploy to DEV'
     dependsOn: Build # Run only if Build stage succeeds
     condition: succeeded()
-    variables:
-    - group: PowerBI-DEV-Variables
     jobs:
       - deployment: DeployFabricItems
         displayName: 'Deploy Fabric Items'
