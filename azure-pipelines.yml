@@ -1,124 +1,181 @@
-trigger: none
+name: PowerBI-CICD-$(Date:yyyyMMdd)$(Rev:.r)
+
+# Define triggers
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - '**/*.Report/**'
+      - '**/*.SemanticModel/**'
+
+pr:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - '**/*.Report/**'
+      - '**/*.SemanticModel/**'
+
+variables:
+- group: PowerBIDevelopmentVariables
 
 pool:
   name: Default
 
+
+# Artifacts BUILD Stage
+
 stages:
- - stage: Build
-   jobs:
+  - stage: Build
+    displayName: 'Build and BPA Checks'
+    jobs:
+      - job: BPA_SemanticModels
+        displayName: 'BPA Semantic Models'
+        # If using a self-hosted agent, ensure PowerShell is available.
+        # If using a Microsoft-hosted agent, specify vmImage: 'windows-latest'
+        pool:
+          name: Default
+        steps:
+          - checkout: self # Checks out the repository code
 
-    - job: Build_Datasets
-      steps:
-        - checkout: self
-          path: 'self'
-        - task: PowerShell@2
-          displayName: 'Download Tabular Editor and Default Rules'
-          inputs:
-            targetType: inline
-            script: |     
-              $path = "$(Build.SourcesDirectory)"                       
-              $tempPath = "$path\_temp"
-              $toolPath = "$path\_tools\TE"
-              New-Item -ItemType Directory -Path $tempPath -ErrorAction SilentlyContinue | Out-Null              
-              
-              Write-Host "##[debug]Downloading Tabular Editor binaries"
-              $downloadUrl = "https://github.com/TabularEditor/TabularEditor/releases/latest/download/TabularEditor.Portable.zip"
-              $zipFile = "$tempPath\TabularEditor.zip"
-              Invoke-WebRequest -Uri $downloadUrl -OutFile $zipFile
-              Expand-Archive -Path $zipFile -DestinationPath $toolPath -Force            
+          - task: PowerShell@2
+            displayName: 'Run BPA on Semantic Models'
+            inputs:
+              targetType: inline
+              # Assuming .bpa/bpa.ps1 is relative to your repo root
+              script: |
+                # Ensure the script is executable or specify full path
+                $scriptPath = "$(Build.SourcesDirectory)\.bpa\bpa.ps1"
+                $srcPath = "$(Build.SourcesDirectory)\src" # Assuming your PBIP components are in a 'src' folder
 
-              Write-Host "##[debug]Downloading Dataset default rules"
-              $downloadUrl = "https://raw.githubusercontent.com/microsoft/Analysis-Services/master/BestPracticeRules/BPARules.json"
-              Invoke-WebRequest -Uri $downloadUrl -OutFile "$tempPath\Rules-Dataset.json"     
-        - task: PowerShell@2
-          displayName: 'Run Dataset Rules'
-          inputs:
-            targetType: inline
-            script: |
-              $path = "$(Build.SourcesDirectory)"
-              $tempPath = "$path\_temp"
-              $toolPath = "$path\_Tools\TE\TabularEditor.exe"
-              $rulesPath = "$path\Rules-Dataset.json"
+                # Correctly pass array arguments to PowerShell script
+                & "$scriptPath" -src @("$srcPath\*.SemanticModel")
 
-              if (!(Test-Path $rulesPath))
-              {
-                  Write-Host "Running downloaded rules"
-                  $rulesPath = "$tempPath\Rules-Dataset.json"
-              }
+      - job: BPA_Reports
+        displayName: 'BPA Reports'
+        pool:
+          name: Default
+        steps:
+          - checkout: self
 
-              $itemsFolders = Get-ChildItem  -Path $path -recurse -include ("*.pbidataset", "*.pbism")
+          - task: PowerShell@2
+            displayName: 'Run BPA on Reports'
+            inputs:
+              targetType: inline
+              script: |
+                $scriptPath = "$(Build.SourcesDirectory)\.bpa\bpa.ps1"
+                $srcPath = "$(Build.SourcesDirectory)\src" # Assuming your PBIP components are in a 'src' folder
 
-              foreach($itemFolder in $itemsFolders)
-              {	
-                  $itemPath = "$($itemFolder.Directory.FullName)\definition"
+                & "$scriptPath" -src @("$srcPath\*.Report")
 
-                  if (!(Test-Path $itemPath))
-                  {
-                      $itemPath = "$($itemFolder.Directory.FullName)\model.bim"
 
-                      if (!(Test-Path $itemPath))
-                      {
-                          throw "Cannot find semantic model definition."
-                      }
+# Deployment Stages
 
-                  }
+  - stage: Deploy_DEV
+    displayName: 'Deploy to DEV'
+    dependsOn: Build # Run only if Build stage succeeds
+    condition: succeeded()
+    variables:
+    - group: PowerBIDevelopmentVariables
+    - name: environment_name
+      value: DEV
+    - name: workspace_name
+      value: $(dev_workspace_name)
+    jobs:
+      - deployment: DeployFabricItems
+        displayName: 'Deploy Fabric Items'
+        environment: 'ContosoDEV'
+        # If using a self-hosted agent, ensure Python is installed or use UsePythonVersion
+        pool:
+          name: Default
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
 
-                  Write-Host "##[group]Running rules for: '$itemPath'"
+                - script: |
+                    "C:\Program Files\Python312\python.exe" --version
+                    "C:\Program Files\Python312\python.exe" -m pip install azure-identity fabric-cicd
+                  displayName: 'Install Python Packages'
 
-                  # Start-Process -FilePath "$toolPath" -ArgumentList """$itemPath"" -A ""$rulesPath"" -V" -NoNewWindow -Wait  # Remove this line to run the rules
+                - script: |
+                    "C:\Program Files\Python312\python.exe" deploy.py ^
+                      --spn-auth ^
+                      --workspace "$(dev_workspace_name)" ^
+                      --src "$(Build.SourcesDirectory)/src"
+                  displayName: 'Run $(environment_name) Deployment Script'
 
-                  Write-Host "##[endgroup]"
-              }
+                  env:
+                    FABRIC_CLIENT_ID: $(powerbi_client_id)
+                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
+                    FABRIC_TENANT_ID: $(tenant_id)
 
-    - job: Build_Reports
-      steps:
-        - checkout: self
-          path: 'self'
-        - task: PowerShell@2
-          displayName: 'Download PBIXInspector'
-          inputs:
-            targetType: inline
-            script: |
-              $path = "$(Build.SourcesDirectory)"
-              $tempPath = "$path\_temp"
-              $toolPath = "$path\_Tools\PBIInspector"
-              New-Item -ItemType Directory -Path $tempPath -ErrorAction SilentlyContinue | Out-Null
 
-              Write-Host "##[debug]Downloading PBI Inspector"
-              $downloadUrl = "https://github.com/NatVanG/PBI-Inspector/releases/latest/download/win-x64-CLI.zip" 
-              $zipFile = "$tempPath\PBIXInspector.zip"
-              Invoke-WebRequest -Uri $downloadUrl -OutFile $zipFile
-              Expand-Archive -Path $zipFile -DestinationPath $toolPath -Force                            
+  - stage: Deploy_UAT
+    displayName: 'Deploy to UAT'
+    dependsOn: Deploy_DEV
+    condition: succeeded()
+    variables:
+    - group: PowerBIDevelopmentVariables
+    - name: environment_name
+      value: UAT
+    - name: workspace_name
+      value: $(uat_workspace_name)
+    jobs:
+      - deployment: DeployFabricItemsUAT
+        displayName: 'Deploy Fabric Items to UAT'
+        environment: 'ContosoUAT'
+        pool:
+          name: Default
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - script: |
+                    "C:\Program Files\Python312\python.exe" deploy.py ^
+                      --spn-auth ^
+                      --workspace "$(workspace_name)" ^
+                      --src "$(Build.SourcesDirectory)/src"
+                  displayName: 'Run $(environment_name) Deployment Script'
+                  env:
+                    FABRIC_CLIENT_ID: $(powerbi_client_id)
+                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
+                    FABRIC_TENANT_ID: $(tenant_id)
 
-              Write-Host "##[debug]Downloading Report default rules"
-              $downloadUrl = "https://raw.githubusercontent.com/NatVanG/PBI-Inspector/main/Rules/Base-rules.json"
-              Invoke-WebRequest -Uri $downloadUrl -OutFile "$tempPath\Rules-Report.json"     
 
-        - task: PowerShell@2
-          displayName: 'Run Report Rules'
-          inputs:
-            targetType: inline
-            script: |
-                  $path = "$(Build.SourcesDirectory)"
-                  $tempPath = "$path\_temp"
-                  $toolPath =  "$path\_Tools\PBIInspector\win-x64\CLI\PBIXInspectorCLI.exe"
-                  $rulesPath = "$path\Rules-Report.json"
-
-                  if (!(Test-Path $rulesPath))
-                  {
-                      Write-Host "Running default downloaded rules"
-                      $rulesPath = "$tempPath\Rules-Report.json"
-                  }
-
-                  $itemsFolders = Get-ChildItem  -Path $path -recurse -include *.pbir
-
-                  foreach($itemFolder in $itemsFolders)
-                  {	
-                      $itemPath = $itemFolder.Directory.FullName
-                      
-                      Write-Host "##[group]Running rules for: '$itemPath'"
-
-                      Start-Process -FilePath "$toolPath" -ArgumentList "-pbipreport ""$itemPath"" -rules ""$rulesPath"" -formats ""ADO""" -NoNewWindow -Wait
-                      
-                      Write-Host "##[endgroup]"
-                  }
+  - stage: Deploy_PROD
+    displayName: 'Deploy to PROD'
+    dependsOn: Deploy_UAT
+    condition: succeeded()
+    variables:
+    - group: PowerBIDevelopmentVariables
+    - name: environment_name
+      value: PROD
+    - name: workspace_name
+      value: $(prod_workspace_name)
+    jobs:
+      - deployment: DeployFabricItemsPROD
+        displayName: 'Deploy Fabric Items to PROD'
+        environment: 'ContosoPROD'
+        pool:
+          name: Default
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - script: |
+                    "C:\Program Files\Python312\python.exe" deploy.py ^
+                      --spn-auth ^
+                      --workspace "$(workspace_name)" ^
+                      --src "$(Build.SourcesDirectory)/src"
+                  displayName: 'Run $(environment_name) Deployment Script'
+                  env:
+                    FABRIC_CLIENT_ID: $(powerbi_client_id)
+                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
+                    FABRIC_TENANT_ID: $(tenant_id)
