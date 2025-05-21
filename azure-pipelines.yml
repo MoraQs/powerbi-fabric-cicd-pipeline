@@ -96,10 +96,8 @@ stages:
                 #     versionSpec: '3.x' # Use a specific version like '3.9' or '3.12'
 
                 - script: |
-                    python --version  # Check Python version
-                    python -m pip install --upgrade pip
-                    python -m pip --version
-                    python -m pip install azure-identity fabric-cicd
+                    "C:\Program Files\Python312\python.exe" --version
+                    "C:\Program Files\Python312\python.exe" -m pip install azure-identity fabric-cicd
                   displayName: 'Install Python Packages'
 
                 - task: PythonScript@0
