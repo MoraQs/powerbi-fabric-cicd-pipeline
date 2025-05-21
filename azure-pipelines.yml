@@ -110,18 +110,6 @@ stages:
                       FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
                       FABRIC_TENANT_ID: $(tenant_id)
 
-                - script: |
-                    fabric refresh ^
-                      --workspace "$(workspace_name)" ^
-                      --dataset "$(dataset_name)" ^
-                      --wait
-                  displayName: 'Refresh $(environment_name) Semantic Model Dataset'
-                  env:
-                    FABRIC_CLIENT_ID: $(powerbi_client_id)
-                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
-                    FABRIC_TENANT_ID: $(tenant_id)
-
-
   - stage: Deploy_UAT
     displayName: 'Deploy to UAT'
     dependsOn: Deploy_DEV
@@ -155,18 +143,6 @@ stages:
                       FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
                       FABRIC_TENANT_ID: $(tenant_id)
 
-                - script: |
-                    fabric refresh ^
-                      --workspace "$(workspace_name)" ^
-                      --dataset "$(dataset_name)" ^
-                      --wait
-                  displayName: 'Refresh $(environment_name) Semantic Model Dataset'
-                  env:
-                    FABRIC_CLIENT_ID: $(powerbi_client_id)
-                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
-                    FABRIC_TENANT_ID: $(tenant_id)
-
-
   - stage: Deploy_PROD
     displayName: 'Deploy to PROD'
     dependsOn: Deploy_UAT
@@ -199,14 +175,3 @@ stages:
                       FABRIC_CLIENT_ID: $(powerbi_client_id)
                       FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
                       FABRIC_TENANT_ID: $(tenant_id)
-
-                - script: |
-                    fabric refresh ^
-                      --workspace "$(workspace_name)" ^
-                      --dataset "$(dataset_name)" ^
-                      --wait
-                  displayName: 'Refresh $(environment_name) Semantic Model Dataset'
-                  env:
-                    FABRIC_CLIENT_ID: $(powerbi_client_id)
-                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
-                    FABRIC_TENANT_ID: $(tenant_id)
