@@ -5,6 +5,7 @@ trigger:
   branches:
     include:
       - main
+      - feature/*
   paths:
     include:
       - '**/*.Report/**'
@@ -194,7 +195,7 @@ stages:
                       --dataset "$(dataset_name)" ^
                       --wait
                   displayName: 'Refresh $(environment_name) Semantic Model Dataset'
-                  
+
                   env:
                     FABRIC_CLIENT_ID: $(powerbi_client_id)
                     FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
