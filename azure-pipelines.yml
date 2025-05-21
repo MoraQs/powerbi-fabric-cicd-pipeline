@@ -1,270 +1,109 @@
-trigger: none
+name: 'PowerBI CI/CD Pipeline' # A meaningful name for your pipeline
 
+# Define triggers
+trigger:
+  # push: # Uncomment and configure if you want pushes to trigger the pipeline
+  #   branches:
+  #     - main
+  #   paths:
+  #     - '**/*.Report/**'
+  #     - '**/*.SemanticModel/**'
+
+pr: # Equivalent to GitHub Actions 'pull_request'
+  branches:
+    - main
+  paths:
+    - '**/*.Report/**'
+    - '**/*.SemanticModel/**'
+
+# Manual trigger with input for deployment workspace (similar to workflow_dispatch)
+# The manual trigger can also be configured in the Azure DevOps UI
 variables:
-- group: PowerBIDevelopmentVariables
+- group: PowerBIDevelopmentVariables # Link your variable group for credentials
 
 pool:
   name: Default
 
 stages:
- - stage: Build
-   jobs:
+  - stage: Build
+    displayName: 'Build and BPA Checks'
+    jobs:
+      - job: BPA_SemanticModels
+        displayName: 'BPA Semantic Models'
+        # If using a self-hosted agent, ensure PowerShell is available.
+        # If using a Microsoft-hosted agent, specify vmImage: 'windows-latest'
+        pool:
+          name: Default
+        steps:
+          - checkout: self # Checks out the repository code
 
-    - job: Build_Datasets
-      steps:
-        - checkout: self
-          path: 'self'
-        - task: PowerShell@2
-          displayName: 'Download Tabular Editor and Default Rules'
-          inputs:
-            targetType: inline
-            script: |     
-              $path = "$(Build.SourcesDirectory)"                       
-              $tempPath = "$path\_temp"
-              $toolPath = "$path\_tools\TE"
-              New-Item -ItemType Directory -Path $tempPath -ErrorAction SilentlyContinue | Out-Null              
-              
-              Write-Host "##[debug]Downloading Tabular Editor binaries"
-              $downloadUrl = "https://github.com/TabularEditor/TabularEditor/releases/latest/download/TabularEditor.Portable.zip"
-              $zipFile = "$tempPath\TabularEditor.zip"
-              Invoke-WebRequest -Uri $downloadUrl -OutFile $zipFile
-              Expand-Archive -Path $zipFile -DestinationPath $toolPath -Force            
+          - task: PowerShell@2
+            displayName: 'Run BPA on Semantic Models'
+            inputs:
+              targetType: inline
+              # Assuming .bpa/bpa.ps1 is relative to your repo root
+              script: |
+                # Ensure the script is executable or specify full path
+                $scriptPath = "$(Build.SourcesDirectory)\.bpa\bpa.ps1"
+                $srcPath = "$(Build.SourcesDirectory)\src" # Assuming your PBIP components are in a 'src' folder
 
-              Write-Host "##[debug]Downloading Dataset default rules"
-              $downloadUrl = "https://raw.githubusercontent.com/microsoft/Analysis-Services/master/BestPracticeRules/BPARules.json"
-              Invoke-WebRequest -Uri $downloadUrl -OutFile "$tempPath\Rules-Dataset.json" 
+                # Correctly pass array arguments to PowerShell script
+                & "$scriptPath" -src @("$srcPath\*.SemanticModel")
 
-        - task: PowerShell@2
-          displayName: 'Run Dataset Rules'
-          inputs:
-            targetType: inline
-            script: |
-              $path = "$(Build.SourcesDirectory)"
-              $tempPath = "$path\_temp"
-              $toolPath = "$path\_Tools\TE\TabularEditor.exe"
-              $rulesPath = "$path\Rules-Dataset.json"
+      - job: BPA_Reports
+        displayName: 'BPA Reports'
+        pool:
+          name: Default
+        steps:
+          - checkout: self
 
-              if (!(Test-Path $rulesPath))
-              {
-                  Write-Host "Running downloaded rules"
-                  $rulesPath = "$tempPath\Rules-Dataset.json"
-              }
+          - task: PowerShell@2
+            displayName: 'Run BPA on Reports'
+            inputs:
+              targetType: inline
+              script: |
+                $scriptPath = "$(Build.SourcesDirectory)\.bpa\bpa.ps1"
+                $srcPath = "$(Build.SourcesDirectory)\src" # Assuming your PBIP components are in a 'src' folder
 
-              $itemsFolders = Get-ChildItem  -Path $path -recurse -include ("*.pbidataset", "*.pbism")
+                & "$scriptPath" -src @("$srcPath\*.Report")
 
-              foreach($itemFolder in $itemsFolders)
-              {	
-                  $itemPath = "$($itemFolder.Directory.FullName)\definition"
+  - stage: Deploy_UAT
+    displayName: 'Deploy to UAT'
+    dependsOn: Build # Ensures this stage only runs if Build stage succeeds
+    condition: succeeded() # Also ensures it runs only if Build succeeds
+    jobs:
+      - deployment: DeployFabricItems
+        displayName: 'Deploy Fabric Items'
+        environment: 'ContosoUAT' # Link to your Azure DevOps environment for security/approvals
+        # If using a self-hosted agent, ensure Python is installed or use UsePythonVersion.
+        # If using a Microsoft-hosted agent, specify vmImage: 'ubuntu-latest' or 'windows-latest'
+        pool:
+          name: Default # Or vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self # Checks out the repository code again for the deploy script
 
-                  if (!(Test-Path $itemPath))
-                  {
-                      $itemPath = "$($itemFolder.Directory.FullName)\model.bim"
+                - task: UsePythonVersion@0
+                  displayName: 'Use Python 3.x'
+                  inputs:
+                    versionSpec: '3.x' # Use a specific version like '3.9' or '3.12'
 
-                      if (!(Test-Path $itemPath))
-                      {
-                          throw "Cannot find semantic model definition."
-                      }
+                - script: |
+                    pip install azure-identity fabric-cicd
+                  displayName: 'Install Python Packages'
 
-                  }
-
-                  Write-Host "##[group]Running rules for: '$itemPath'"
-
-                  # Start-Process -FilePath "$toolPath" -ArgumentList """$itemPath"" -A ""$rulesPath"" -V" -NoNewWindow -Wait  # Remove this line to run the rules
-
-                  Write-Host "##[endgroup]"
-              }
-
-
-    - job: Build_Reports
-      steps:
-        - checkout: self
-          path: 'self'
-        
-        - task: PowerShell@2
-          displayName: 'Download pbi-tools CLI' # Removed Debugging from display name
-          inputs:
-            targetType: inline
-            script: |
-              $toolPath = "$(Build.SourcesDirectory)\_tools\pbi-tools"
-              $tempZipPath = "$(Build.SourcesDirectory)\_temp\pbi-tools.zip" 
-              
-              New-Item -ItemType Directory -Path $toolPath -ErrorAction SilentlyContinue | Out-Null
-              New-Item -ItemType Directory -Path (Split-Path $tempZipPath) -ErrorAction SilentlyContinue | Out-Null 
-
-              $downloadUrl = "https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_win-x64.zip"
-
-              Write-Host "Downloading from $downloadUrl to $tempZipPath"
-
-              try {
-                Invoke-WebRequest -Uri $downloadUrl -OutFile $tempZipPath -UseBasicParsing -ErrorAction Stop
-                Write-Host "Download completed."
-              } catch {
-                Write-Error "Download failed: $($_.Exception.Message)"
-                exit 1
-              }
-
-              try {
-                # Expand the archive directly into the $toolPath.
-                # Based on your logs, the executables are directly within the unzipped root.
-                Expand-Archive -Path $tempZipPath -DestinationPath $toolPath -Force -ErrorAction Stop
-                Write-Host "Unzipped successfully."
-              } catch {
-                Write-Error "Unzip failed: $($_.Exception.Message)"
-                exit 1
-              }
-
-              # --- CRITICAL FIX HERE ---
-              # The executable is named 'pbi-tools.core.exe' and is directly in $toolPath
-              $pbiToolsExePath = Join-Path -Path $toolPath -ChildPath "pbi-tools.core.exe"
-
-              if (-not (Test-Path $pbiToolsExePath)) {
-                Write-Error "pbi-tools.core.exe not found at expected path: $pbiToolsExePath. Please check the zip content."
-                exit 1
-              }
-              # --- END CRITICAL FIX ---
-
-              Write-Host "pbi-tools.core.exe found at: $pbiToolsExePath"
-              Write-Host "pbi-tools is ready."
-
-              # Set a pipeline variable for easy access in subsequent tasks
-              # Name it for consistency, but remember it points to .core.exe
-              Write-Host "##vso[task.setvariable variable=PbiToolsExePath]$pbiToolsExePath"
-
-
-
-        - task: PowerShell@2
-          displayName: 'Download PBIXInspector'
-          inputs:
-            targetType: inline
-            script: |
-              $path = "$(Build.SourcesDirectory)"
-              $tempPath = "$path\_temp"
-              $toolPath = "$path\_Tools\PBIInspector"
-              New-Item -ItemType Directory -Path $tempPath -ErrorAction SilentlyContinue | Out-Null
-
-              Write-Host "##[debug]Downloading PBI Inspector"
-              $downloadUrl = "https://github.com/NatVanG/PBI-Inspector/releases/latest/download/win-x64-CLI.zip" 
-              $zipFile = "$tempPath\PBIXInspector.zip"
-              Invoke-WebRequest -Uri $downloadUrl -OutFile $zipFile
-              Expand-Archive -Path $zipFile -DestinationPath $toolPath -Force                            
-
-              Write-Host "##[debug]Downloading Report default rules"
-              $downloadUrl = "https://raw.githubusercontent.com/NatVanG/PBI-Inspector/main/Rules/Base-rules.json"
-              Invoke-WebRequest -Uri $downloadUrl -OutFile "$tempPath\Rules-Report.json"     
-
-        - task: PowerShell@2
-          displayName: 'Run Report Rules'
-          inputs:
-            targetType: inline
-            script: |
-                  $path = "$(Build.SourcesDirectory)"
-                  $tempPath = "$path\_temp"
-                  $toolPath =  "$path\_Tools\PBIInspector\win-x64\CLI\PBIXInspectorCLI.exe"
-                  $rulesPath = "$path\Rules-Report.json"
-
-                  if (!(Test-Path $rulesPath))
-                  {
-                      Write-Host "Running default downloaded rules"
-                      $rulesPath = "$tempPath\Rules-Report.json"
-                  }
-
-                  $itemsFolders = Get-ChildItem  -Path $path -recurse -include *.pbir
-
-                  foreach($itemFolder in $itemsFolders)
-                  {	
-                      $itemPath = $itemFolder.Directory.FullName
-                      
-                      Write-Host "##[group]Running rules for: '$itemPath'"
-
-                      Start-Process -FilePath "$toolPath" -ArgumentList "-pbipreport ""$itemPath"" -rules ""$rulesPath"" -formats ""ADO""" -NoNewWindow -Wait
-                      
-                      Write-Host "##[endgroup]"
-                  }
-
-        - task: PowerShell@2
-          displayName: 'Build .pbix from .pbip'
-          inputs:
-            targetType: inline
-            script: |
-              $pbipPath = "$(Build.SourcesDirectory)\Contoso"
-              $outputPath = "$(Build.ArtifactStagingDirectory)\Contoso.pbix"
-              $pbiToolsPath = "$(Build.SourcesDirectory)\_tools\pbi-tools\pbi-tools.core.exe" 
-
-              Write-Host "Building .pbix from .pbip project using 'compile' command..."
-              Write-Host "pbi-tools executable path: $pbiToolsPath"
-              Write-Host "PBIP project path: $pbipPath"
-              Write-Host "Output PBIX path: $outputPath"
-              
-              & "$pbiToolsPath" compile "$pbipPath" --outPath "$outputPath" --overwrite
-
-              if ($LASTEXITCODE -ne 0) {
-                  Write-Error "pbi-tools compile failed with exit code $LASTEXITCODE"
-                  exit 1
-              }
-
-              Write-Host "Successfully compiled .pbix to: $outputPath"
-
-
-        - task: PublishBuildArtifacts@1
-          displayName: "Publish Contoso.pbix"
-          inputs:
-            pathToPublish: '$(Build.ArtifactStagingDirectory)\Contoso.pbix'
-            artifactName: 'pbix-drop'
-
-
- - stage: Deploy_UAT
-   dependsOn: Build
-   condition: succeeded()
-   jobs:
-    - deployment: DeployToUAT
-      displayName: 'Deploy to UAT Workspace'
-      environment: 'ContosoUAT'
-      strategy:
-        runOnce:
-          deploy:
-            steps:
-              - checkout: self
-
-              - task: DownloadPipelineArtifact@2
-                displayName: 'Download PBIX Artifact'
-                inputs:
-                  artifact: 'pbix-drop'
-                  path: '$(Pipeline.Workspace)/drop'
-
-              - task: PowerShell@2
-                displayName: 'Deploy Dataset and Report to UAT'
-                inputs:
-                  targetType: 'inline'
-                  script: |
-                    # Retrieve credentials from pipeline variables
-                    $clientId = "$(powerbi_client_id)"
-                    $clientSecret = "$(powerbi_client_secret)"
-                    $tenantId = "$(tenant_id)"
-                    $workspaceId = "$(uat_workspace_id)"  # Define this variable securely
-                    $datasetName = "ContosoUAT"       # Update as needed
-                    $pbixPath = "$(Pipeline.Workspace)\drop\Contoso.pbix"  # Adjust to actual artifact path
-
-                    # Authenticate to Power BI using client credentials flow
-                    $body = @{
-                      grant_type    = "client_credentials"
-                      client_id     = $clientId
-                      client_secret = $clientSecret
-                      resource      = "https://analysis.windows.net/powerbi/api"
-                    }
-
-                    Write-Host "Authenticating to Azure AD..."
-                    $tokenResponse = Invoke-RestMethod -Uri "https://login.microsoftonline.com/$tenantId/oauth2/token" -Method Post -Body $body
-                    $accessToken = $tokenResponse.access_token
-
-                    # Deploy the PBIX to UAT workspace
-                    $importUrl = "https://api.powerbi.com/v1.0/myorg/groups/$workspaceId/imports?datasetDisplayName=$datasetName&nameConflict=Overwrite"
-
-                    Write-Host "Deploying PBIX to UAT Workspace ($workspaceId)..."
-                    Invoke-RestMethod -Uri $importUrl `
-                                      -Headers @{ Authorization = "Bearer $accessToken" } `
-                                      -Method Post `
-                                      -InFile $pbixPath `
-                                      -ContentType "application/octet-stream"
-                    Write-Host "PBIX deployed successfully to UAT Workspace ($workspaceId)."
-
-## Let's see if it works
+                - task: PythonScript@0
+                  displayName: 'Run Deployment Script'
+                  inputs:
+                    scriptSource: 'filePath'
+                    filePath: 'deploy.py' # Assuming deploy.py is in your repo root
+                    arguments: > # Arguments for your deploy.py script
+                      --spn-auth # True Explicitly set to True if using SPN
+                      --workspace "$(uat_workspace_name)"
+                      --src "$(Build.SourcesDirectory)/src"
+                  env:
+                    FABRIC_CLIENT_ID: $(powerbi_client_id)
+                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret) # Securely passed
+                    FABRIC_TENANT_ID: $(tenant_id)
