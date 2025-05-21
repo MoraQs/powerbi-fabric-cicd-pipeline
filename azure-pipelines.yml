@@ -34,8 +34,6 @@ stages:
     jobs:
       - job: BPA_SemanticModels
         displayName: 'BPA Semantic Models'
-        # If using a self-hosted agent, ensure PowerShell is available.
-        # If using a Microsoft-hosted agent, specify vmImage: 'windows-latest'
         pool:
           name: Default
         steps:
@@ -45,7 +43,6 @@ stages:
             displayName: 'Run BPA on Semantic Models'
             inputs:
               targetType: inline
-              # Assuming .bpa/bpa.ps1 is relative to your repo root
               script: |
                 # Ensure the script is executable or specify full path
                 $scriptPath = "$(Build.SourcesDirectory)\.bpa\bpa.ps1"
@@ -76,7 +73,7 @@ stages:
 
   - stage: Deploy_DEV
     displayName: 'Deploy to DEV'
-    dependsOn: Build # Run only if Build stage succeeds
+    dependsOn: Build
     condition: succeeded()
     variables:
     - group: PowerBIDevelopmentVariables
@@ -109,6 +106,13 @@ stages:
                       --src "$(Build.SourcesDirectory)/src"
                   displayName: 'Run $(environment_name) Deployment Script'
 
+                - script: |
+                    fabric refresh ^
+                      --workspace "$(workspace_name)" ^
+                      --dataset "$(dataset_name)" ^
+                      --wait
+                  displayName: 'Refresh $(environment_name) Semantic Model Dataset'
+
                   env:
                     FABRIC_CLIENT_ID: $(powerbi_client_id)
                     FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
@@ -118,7 +122,7 @@ stages:
   - stage: Deploy_UAT
     displayName: 'Deploy to UAT'
     dependsOn: Deploy_DEV
-    condition: succeeded()
+    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
     variables:
     - group: PowerBIDevelopmentVariables
     - name: environment_name
@@ -142,6 +146,14 @@ stages:
                       --workspace "$(workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
                   displayName: 'Run $(environment_name) Deployment Script'
+                
+                - script: |
+                    fabric refresh ^
+                      --workspace "$(workspace_name)" ^
+                      --dataset "$(dataset_name)" ^
+                      --wait
+                  displayName: 'Refresh $(environment_name) Semantic Model Dataset'
+
                   env:
                     FABRIC_CLIENT_ID: $(powerbi_client_id)
                     FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
@@ -151,7 +163,7 @@ stages:
   - stage: Deploy_PROD
     displayName: 'Deploy to PROD'
     dependsOn: Deploy_UAT
-    condition: succeeded()
+    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
     variables:
     - group: PowerBIDevelopmentVariables
     - name: environment_name
@@ -175,6 +187,14 @@ stages:
                       --workspace "$(workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
                   displayName: 'Run $(environment_name) Deployment Script'
+
+                - script: |
+                    fabric refresh ^
+                      --workspace "$(workspace_name)" ^
+                      --dataset "$(dataset_name)" ^
+                      --wait
+                  displayName: 'Refresh $(environment_name) Semantic Model Dataset'
+                  
                   env:
                     FABRIC_CLIENT_ID: $(powerbi_client_id)
                     FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
