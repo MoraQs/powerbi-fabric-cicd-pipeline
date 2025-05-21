@@ -25,6 +25,9 @@ variables:
 pool:
   name: Default
 
+
+# Artifacts BUILD Stage
+
 stages:
   - stage: Build
     displayName: 'Build and BPA Checks'
@@ -68,12 +71,17 @@ stages:
 
                 & "$scriptPath" -src @("$srcPath\*.Report")
 
+
+# Deployment Stages
+
   - stage: Deploy_DEV
     displayName: 'Deploy to DEV'
     dependsOn: Build # Run only if Build stage succeeds
     condition: succeeded()
     variables:
     - group: PowerBIDevelopmentVariables
+    - name: environment_name
+      value: DEV
     - name: workspace_name
       value: $(dev_workspace_name)
     jobs:
@@ -99,7 +107,7 @@ stages:
                       --spn-auth ^
                       --workspace "$(dev_workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
-                  displayName: 'Run Deployment Script'
+                  displayName: 'Run $(environment_name) Deployment Script'
 
                   env:
                     FABRIC_CLIENT_ID: $(powerbi_client_id)
@@ -113,11 +121,45 @@ stages:
     condition: succeeded()
     variables:
     - group: PowerBIDevelopmentVariables
+    - name: environment_name
+      value: UAT
     - name: workspace_name
       value: $(uat_workspace_name)
     jobs:
-      - deployment: DeployFabricItemsProd
+      - deployment: DeployFabricItemsUAT
         displayName: 'Deploy Fabric Items to UAT'
+        environment: 'ContosoUAT'
+        pool:
+          name: Default
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - script: |
+                    "C:\Program Files\Python312\python.exe" deploy.py ^
+                      --spn-auth ^
+                      --workspace "$(workspace_name)" ^
+                      --src "$(Build.SourcesDirectory)/src"
+                  displayName: 'Run $(environment_name) Deployment Script'
+                  env:
+                    FABRIC_CLIENT_ID: $(powerbi_client_id)
+                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
+                    FABRIC_TENANT_ID: $(tenant_id)
+
+  - stage: Deploy_PROD
+    displayName: 'Deploy to PROD'
+    dependsOn: Deploy_DEV
+    condition: succeeded()
+    variables:
+    - group: PowerBIDevelopmentVariables
+    - name: environment_name
+      value: PROD
+    - name: workspace_name
+      value: $(prod_workspace_name)
+    jobs:
+      - deployment: DeployFabricItemsPROD
+        displayName: 'Deploy Fabric Items to PROD'
         environment: 'ContosoPROD'
         pool:
           name: Default
@@ -131,9 +173,8 @@ stages:
                       --spn-auth ^
                       --workspace "$(workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
-                  displayName: 'Run Production Deployment Script'
+                  displayName: 'Run $(environment_name) Deployment Script'
                   env:
                     FABRIC_CLIENT_ID: $(powerbi_client_id)
                     FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
                     FABRIC_TENANT_ID: $(tenant_id)
-
