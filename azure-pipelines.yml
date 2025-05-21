@@ -110,16 +110,25 @@ stages:
                     dir "$(Build.SourcesDirectory)\deploy.py"
                   displayName: 'Confirm deploy.py exists exactly'
 
-                - task: PythonScript@0
-                  displayName: 'Run Deployment Script'
-                  inputs:
-                    scriptSource: 'filePath'
-                    filePath: '$(Build.SourcesDirectory)\deploy.py' # Assuming deploy.py is in your repo root
-                    arguments: > # Arguments for your deploy.py script
-                      --spn-auth
-                      --workspace "$(uat_workspace_name)"
+                # - task: PythonScript@0
+                #   displayName: 'Run Deployment Script'
+                #   inputs:
+                #     scriptSource: 'filePath'
+                #     filePath: '$(Build.SourcesDirectory)\deploy.py' # Assuming deploy.py is in your repo root
+                #     arguments: > # Arguments for your deploy.py script
+                #       --spn-auth
+                #       --workspace "$(uat_workspace_name)"
+                #       --src "$(Build.SourcesDirectory)/src"
+
+
+                - script: |
+                    "C:\Program Files\Python312\python.exe" deploy.py ^
+                      --spn-auth ^
+                      --workspace "$(uat_workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
+                  displayName: 'Run Deployment Script'
+                  
                   env:
                     FABRIC_CLIENT_ID: $(powerbi_client_id)
-                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret) # Securely passed
+                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
                     FABRIC_TENANT_ID: $(tenant_id)
