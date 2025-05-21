@@ -147,9 +147,10 @@ stages:
                     FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
                     FABRIC_TENANT_ID: $(tenant_id)
 
+
   - stage: Deploy_PROD
     displayName: 'Deploy to PROD'
-    dependsOn: Deploy_DEV
+    dependsOn: Deploy_UAT
     condition: succeeded()
     variables:
     - group: PowerBIDevelopmentVariables
