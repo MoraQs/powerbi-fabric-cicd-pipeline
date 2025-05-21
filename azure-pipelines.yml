@@ -119,7 +119,7 @@ stages:
   - stage: Deploy_UAT
     displayName: 'Deploy to UAT'
     dependsOn: Deploy_DEV
-    condition: succeeded()
+    condition: condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
     variables:
     - group: PowerBIDevelopmentVariables
     - name: environment_name
@@ -152,7 +152,7 @@ stages:
   - stage: Deploy_PROD
     displayName: 'Deploy to PROD'
     dependsOn: Deploy_UAT
-    condition: succeeded()
+    condition: condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
     variables:
     - group: PowerBIDevelopmentVariables
     - name: environment_name
