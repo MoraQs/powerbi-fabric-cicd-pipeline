@@ -19,7 +19,6 @@ pr:
       - '**/*.Report/**'
       - '**/*.SemanticModel/**'
 
-# Manual trigger with input for deployment workspace (similar to workflow_dispatch)
 # The manual trigger can also be configured in the Azure DevOps UI
 variables:
 - group: PowerBIDevelopmentVariables # Link your variable group for credentials
