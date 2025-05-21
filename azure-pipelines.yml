@@ -98,9 +98,12 @@ stages:
                 - script: |
                     "C:\Program Files\Python312\python.exe" --version
                     "C:\Program Files\Python312\python.exe" -m pip install azure-identity fabric-cicd
+                  displayName: 'Install Python Packages'
+
+                - script: |
                     echo "Build.SourcesDirectory: $(Build.SourcesDirectory)"  # Debugging what the agent sees
                     dir "$(Build.SourcesDirectory)"  # Debugging the directory structure
-                  displayName: 'Install Python Packages'
+                  displayName: 'Verify deploy.py presence'
 
                 - task: PythonScript@0
                   displayName: 'Run Deployment Script'
