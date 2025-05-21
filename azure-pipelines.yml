@@ -2,19 +2,19 @@ name: 'PowerBI CI/CD Pipeline' # A meaningful name for your pipeline
 
 # Define triggers
 trigger:
-  # push: # Uncomment and configure if you want pushes to trigger the pipeline
-  #   branches:
-  #     - main
-  #   paths:
-  #     - '**/*.Report/**'
-  #     - '**/*.SemanticModel/**'
+  push: # Uncomment and configure if you want pushes to trigger the pipeline
+    branches:
+      - main
+    paths:
+      - '**/*.Report/**'
+      - '**/*.SemanticModel/**'
 
-pr: # Equivalent to GitHub Actions 'pull_request'
-  branches:
-    - main
-  paths:
-    - '**/*.Report/**'
-    - '**/*.SemanticModel/**'
+  pr:
+    branches:
+      - main
+    paths:
+      - '**/*.Report/**'
+      - '**/*.SemanticModel/**'
 
 # Manual trigger with input for deployment workspace (similar to workflow_dispatch)
 # The manual trigger can also be configured in the Azure DevOps UI
