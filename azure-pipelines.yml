@@ -105,11 +105,16 @@ stages:
                     dir "$(Build.SourcesDirectory)"  # Debugging the directory structure
                   displayName: 'Verify deploy.py presence'
 
+                - script: |
+                    echo "Full path to deploy.py:"
+                    dir "$(Build.SourcesDirectory)\deploy.py"
+                  displayName: 'Confirm deploy.py exists exactly'
+
                 - task: PythonScript@0
                   displayName: 'Run Deployment Script'
                   inputs:
                     scriptSource: 'filePath'
-                    filePath: 'deploy.py' # Assuming deploy.py is in your repo root
+                    filePath: '$(Build.SourcesDirectory)\deploy.py' # Assuming deploy.py is in your repo root
                     arguments: > # Arguments for your deploy.py script
                       --spn-auth
                       --workspace "$(uat_workspace_name)"
