@@ -88,10 +88,12 @@ stages:
               steps:
                 - checkout: self # Checks out the repository code again for the deploy script
 
-                - task: UsePythonVersion@0
-                  displayName: 'Use Python 3.x'
-                  inputs:
-                    versionSpec: '3.x' # Use a specific version like '3.9' or '3.12'
+                ## I'm using a self-hosted agent with Python installed hence I commented this out. It's only useful for Microsoft-hosted agents.
+
+                # - task: UsePythonVersion@0
+                #   displayName: 'Use Python 3.x'
+                #   inputs:
+                #     versionSpec: '3.x' # Use a specific version like '3.9' or '3.12'
 
                 - script: |
                     pip install azure-identity fabric-cicd
@@ -103,7 +105,7 @@ stages:
                     scriptSource: 'filePath'
                     filePath: 'deploy.py' # Assuming deploy.py is in your repo root
                     arguments: > # Arguments for your deploy.py script
-                      --spn-auth # True Explicitly set to True if using SPN
+                      --spn-auth
                       --workspace "$(uat_workspace_name)"
                       --src "$(Build.SourcesDirectory)/src"
                   env:
