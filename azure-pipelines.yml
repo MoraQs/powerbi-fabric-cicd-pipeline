@@ -20,7 +20,7 @@ pr:
       - '**/*.SemanticModel/**'
 
 variables:
-- group: PowerBIDevelopmentVariables # Link your variable group for credentials
+- group: PowerBIDevelopmentVariables
 
 pool:
   name: Default
@@ -68,14 +68,14 @@ stages:
 
                 & "$scriptPath" -src @("$srcPath\*.Report")
 
-  - stage: Deploy_DEV
-    displayName: 'Deploy to DEV'
+  - stage: Deploy_UAT
+    displayName: 'Deploy to UAT'
     dependsOn: Build # Run only if Build stage succeeds
     condition: succeeded()
     jobs:
       - deployment: DeployFabricItems
         displayName: 'Deploy Fabric Items'
-        environment: 'ContosoDEV'
+        environment: 'ContosoUAT'
         # If using a self-hosted agent, ensure Python is installed or use UsePythonVersion
         pool:
           name: Default
@@ -100,7 +100,7 @@ stages:
                 - script: |
                     "C:\Program Files\Python312\python.exe" deploy.py ^
                       --spn-auth ^
-                      --workspace "$(dev_workspace_name)" ^
+                      --workspace "$(uat_workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
                   displayName: 'Run Deployment Script'
 
