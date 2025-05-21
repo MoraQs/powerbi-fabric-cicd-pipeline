@@ -127,8 +127,10 @@ stages:
                       --workspace "$(uat_workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
                   displayName: 'Run Deployment Script'
-                  
+
                   env:
                     FABRIC_CLIENT_ID: $(powerbi_client_id)
                     FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
                     FABRIC_TENANT_ID: $(tenant_id)
+                  variables:
+                    uat_workspace_name: 'ContosoUAT'
