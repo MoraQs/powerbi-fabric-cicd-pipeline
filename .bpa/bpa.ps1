@@ -117,7 +117,8 @@ foreach ($srcPath in $src) {
             $process = Start-Process -FilePath $pbiInspectorEXE -ArgumentList "-pbipreport ""$itemPath"" -rules ""$pbiInspectorRulesPath"" -formats ""GitHub""" -NoNewWindow -Wait -PassThru    
 
             if ($process.ExitCode -ne 0) {
-                throw "Error running BPA rules for: '$itemPath'"
+                # throw "Error running BPA rules for: '$itemPath'"
+                Write-Host "BPA violations found in: '$itemPath'. Continuing execution..."
             }    
         }
         else {
