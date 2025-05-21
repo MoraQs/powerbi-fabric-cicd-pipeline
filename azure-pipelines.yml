@@ -2,12 +2,12 @@ name: 'PowerBI CI/CD Pipeline' # A meaningful name for your pipeline
 
 # Define triggers
 trigger:
-  # push: # Uncomment and configure if you want pushes to trigger the pipeline
-  #   branches:
-  #     - main
-  #   paths:
-  #     - '**/*.Report/**'
-  #     - '**/*.SemanticModel/**'
+  push: # Uncomment and configure if you want pushes to trigger the pipeline
+    branches:
+      - main
+    paths:
+      - '**/*.Report/**'
+      - '**/*.SemanticModel/**'
 
   pr:
     branches:
