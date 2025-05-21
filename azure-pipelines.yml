@@ -76,7 +76,7 @@ stages:
       - deployment: DeployFabricItems
         displayName: 'Deploy Fabric Items'
         environment: 'ContosoDEV'
-        # If using a self-hosted agent, ensure Python is installed or use UsePythonVersion.
+        # If using a self-hosted agent, ensure Python is installed or use UsePythonVersion
         pool:
           name: Default
         strategy:
