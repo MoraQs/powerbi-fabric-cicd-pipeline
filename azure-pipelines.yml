@@ -68,14 +68,18 @@ stages:
 
                 & "$scriptPath" -src @("$srcPath\*.Report")
 
-  - stage: Deploy_UAT
-    displayName: 'Deploy to UAT'
+  - stage: Deploy_DEV
+    displayName: 'Deploy to DEV'
     dependsOn: Build # Run only if Build stage succeeds
     condition: succeeded()
+    variables:
+    - group: PowerBIDevelopmentVariables
+    - name: workspace_name
+      value: $(dev_workspace_name)
     jobs:
       - deployment: DeployFabricItems
         displayName: 'Deploy Fabric Items'
-        environment: 'ContosoUAT'
+        environment: 'ContosoDEV'
         # If using a self-hosted agent, ensure Python is installed or use UsePythonVersion
         pool:
           name: Default
@@ -83,14 +87,7 @@ stages:
           runOnce:
             deploy:
               steps:
-                - checkout: self # Checks out the repository code again for the deploy script
-
-                ## I'm using a self-hosted agent with Python installed hence I commented this out. It's only useful for Microsoft-hosted agents.
-
-                # - task: UsePythonVersion@0
-                #   displayName: 'Use Python 3.x'
-                #   inputs:
-                #     versionSpec: '3.x' # Use a specific version like '3.9' or '3.12'
+                - checkout: self
 
                 - script: |
                     "C:\Program Files\Python312\python.exe" --version
@@ -100,7 +97,7 @@ stages:
                 - script: |
                     "C:\Program Files\Python312\python.exe" deploy.py ^
                       --spn-auth ^
-                      --workspace "$(uat_workspace_name)" ^
+                      --workspace "$(dev_workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
                   displayName: 'Run Deployment Script'
 
@@ -108,3 +105,35 @@ stages:
                     FABRIC_CLIENT_ID: $(powerbi_client_id)
                     FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
                     FABRIC_TENANT_ID: $(tenant_id)
+
+
+  - stage: Deploy_UAT
+    displayName: 'Deploy to UAT'
+    dependsOn: Deploy_DEV
+    condition: succeeded()
+    variables:
+    - group: PowerBIDevelopmentVariables
+    - name: workspace_name
+      value: $(uat_workspace_name)
+    jobs:
+      - deployment: DeployFabricItemsProd
+        displayName: 'Deploy Fabric Items to UAT'
+        environment: 'ContosoPROD'
+        pool:
+          name: Default
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - script: |
+                    "C:\Program Files\Python312\python.exe" deploy.py ^
+                      --spn-auth ^
+                      --workspace "$(workspace_name)" ^
+                      --src "$(Build.SourcesDirectory)/src"
+                  displayName: 'Run Production Deployment Script'
+                  env:
+                    FABRIC_CLIENT_ID: $(powerbi_client_id)
+                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
+                    FABRIC_TENANT_ID: $(tenant_id)
+
