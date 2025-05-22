@@ -11,10 +11,6 @@ pr:
   branches:
     include:
       - main
-  # paths:
-  #   include:
-  #     - '**/*.Report/**'
-  #     - '**/*.SemanticModel/**'
 
 variables:
 - group: PowerBIDevelopmentVariables
