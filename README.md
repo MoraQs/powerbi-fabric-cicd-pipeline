@@ -245,4 +245,4 @@ Apply the `RunBuildStage` variable as a condition on each Build job:
   ...
 ```
 
-This setup ensures your CI pipeline is `smart`, `efficient`, and only runs validations when meaningful PBIP model or report changes are introduced
+This setup ensures your CI pipeline is `smart`, `efficient`, and only runs validations when meaningful PBIP model or report changes are introduced.
