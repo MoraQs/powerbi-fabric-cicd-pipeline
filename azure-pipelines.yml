@@ -51,12 +51,13 @@ stages:
                   $shouldRunBuild = $true
               }
 
-              Write-Host "##vso[task.setvariable variable=RunBuildStage]$shouldRunBuild"
+              Write-Host "##vso[task.setvariable variable=RunBuildStage;isOutput=true]$shouldRunBuild"
               Write-Host "RunBuildStage evaluated to: $shouldRunBuild"
             displayName: 'Set RunBuildStage Variable'
 
 
       - job: BPA_SemanticModels
+        dependsOn: EvaluateBuildRun
         displayName: 'BPA Semantic Models'
         condition: eq(variables['RunBuildStage'], 'true')
         pool:
@@ -77,6 +78,7 @@ stages:
                 & "$scriptPath" -src @("$srcPath\*.SemanticModel")
 
       - job: BPA_Reports
+        dependsOn: EvaluateBuildRun
         displayName: 'BPA Reports'
         condition: eq(variables['RunBuildStage'], 'true')
         pool:

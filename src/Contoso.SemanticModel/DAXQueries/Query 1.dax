@@ -6,3 +6,13 @@ EVALUATE
         'Sales',
         'Sales'[Quantity] > 10
     )
+
+DEFINE 
+MEASURE
+    'Sales'[Total Sales] = SUM('Sales'[Sales Amount])
+
+EVALUATE
+    ADDCOLUMNS(
+        'Sales',
+        "Total Sales", [Total Sales]
+    )
