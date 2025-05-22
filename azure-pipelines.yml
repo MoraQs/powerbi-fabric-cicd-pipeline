@@ -6,10 +6,10 @@ trigger:
     include:
       - main
       - feature/*
-  paths:
-    include:
-      - '**/*.Report/**'
-      - '**/*.SemanticModel/**'
+  # paths:
+  #   include:
+  #     - '**/*.Report/**'
+  #     - '**/*.SemanticModel/**'
 
 pr:
   branches:
@@ -26,9 +26,9 @@ variables:
 pool:
   name: Default
 
-
+# -----------------------------------------------------------------------------------------------------------------------
 # Artifacts BUILD Stage
-
+# -----------------------------------------------------------------------------------------------------------------------
 stages:
   - stage: Build
     displayName: 'Build and BPA Checks'
@@ -69,9 +69,9 @@ stages:
 
                 & "$scriptPath" -src @("$srcPath\*.Report")
 
-
+# -----------------------------------------------------------------------------------------------------------------------
 # Deployment Stages
-
+# -----------------------------------------------------------------------------------------------------------------------
   - stage: Deploy_DEV
     displayName: 'Deploy to DEV'
     dependsOn: Build
@@ -113,7 +113,7 @@ stages:
   - stage: Deploy_UAT
     displayName: 'Deploy to UAT'
     dependsOn: Deploy_DEV
-    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
+    condition: succeeded()
     variables:
     - group: PowerBIDevelopmentVariables
     - name: environment_name
