@@ -6,15 +6,15 @@ trigger:
     include:
       - main
       - feature/*
-      
+
 pr:
   branches:
     include:
       - main
-  paths:
-    include:
-      - '**/*.Report/**'
-      - '**/*.SemanticModel/**'
+  # paths:
+  #   include:
+  #     - '**/*.Report/**'
+  #     - '**/*.SemanticModel/**'
 
 variables:
 - group: PowerBIDevelopmentVariables
