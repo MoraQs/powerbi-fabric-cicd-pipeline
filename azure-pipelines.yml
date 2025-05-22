@@ -6,6 +6,10 @@ trigger:
     include:
       - main
       - feature/*
+  paths:
+    include:
+      - '**/*.Report/**'
+      - '**/*.SemanticModel/**'
 
 pr:
   branches:
@@ -128,7 +132,7 @@ stages:
   - stage: Deploy_UAT
     displayName: 'Deploy to UAT'
     dependsOn: Deploy_DEV
-    condition: succeeded()
+    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
     variables:
     - group: PowerBIDevelopmentVariables
     - name: environment_name
