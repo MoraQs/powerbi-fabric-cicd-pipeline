@@ -1,2 +1,8 @@
 EVALUATE
     TOPN(100, 'Sales')
+
+EVALUATE
+    CALCULATETABLE(
+        'Sales',
+        'Sales'[Quantity] > 10
+    )

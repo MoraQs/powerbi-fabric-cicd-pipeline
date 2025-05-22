@@ -37,18 +37,24 @@ stages:
             fetchDepth: 0
 
           - powershell: |
-              git fetch origin $(Build.SourceBranchName)
-              $changes = git diff --name-only HEAD~1 HEAD
+              git fetch origin main
+              $changes = git diff --name-only origin/main...HEAD
               Write-Host "Changed files:"
               $changes
-              if ($changes -match '\.Report\\' -or $changes -match '\.SemanticModel\\') {
-                  Write-Host "##vso[task.setvariable variable=RunBuildStage]true"
-              } elseif ("$(Build.SourceBranchName)" -eq "main") {
-                  Write-Host "##vso[task.setvariable variable=RunBuildStage]true"
-              } else {
-                  Write-Host "##vso[task.setvariable variable=RunBuildStage]false"
+
+              # Always set the variable to something to avoid 'Null'
+              $shouldRunBuild = $false
+
+              if ("$(Build.SourceBranchName)" -eq "main") {
+                  $shouldRunBuild = $true
+              } elseif ($changes -match '\.Report\\' -or $changes -match '\.SemanticModel\\') {
+                  $shouldRunBuild = $true
               }
+
+              Write-Host "##vso[task.setvariable variable=RunBuildStage]$shouldRunBuild"
+              Write-Host "RunBuildStage evaluated to: $shouldRunBuild"
             displayName: 'Set RunBuildStage Variable'
+
 
       - job: BPA_SemanticModels
         displayName: 'BPA Semantic Models'
