@@ -19,3 +19,5 @@ EVALUATE
         'Sales',
         "Total Sales", [Total Sales]
     )
+
+-- This query will fail because the measure is not defined in the context of the table
