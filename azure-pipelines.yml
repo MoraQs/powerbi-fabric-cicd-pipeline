@@ -40,6 +40,16 @@ stages:
               # Authenticate using pipeline token
               git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" fetch origin main
 
+              # Check if merge base exists
+              $mergeBase = git merge-base origin/main HEAD 2>$null
+
+              if (-not $mergeBase) {
+                  Write-Host "No merge base between origin/main and HEAD. Defaulting to full diff."
+                  $changes = git diff --name-only HEAD
+              } else {
+                  $changes = git diff --name-only origin/main...HEAD
+              }
+
               $changes = git diff --name-only origin/main...HEAD
               Write-Host "Changed files:"
               $changes
