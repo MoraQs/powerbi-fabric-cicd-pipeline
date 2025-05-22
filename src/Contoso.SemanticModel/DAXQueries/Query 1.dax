@@ -16,3 +16,5 @@ EVALUATE
         'Sales',
         "Total Sales", [Total Sales]
     )
+
+-- try to use the measure in a filter
