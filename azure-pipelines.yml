@@ -37,7 +37,9 @@ stages:
             fetchDepth: 0
 
           - powershell: |
-              git fetch origin main
+              # Authenticate using pipeline token
+              git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" fetch origin main
+
               $changes = git diff --name-only origin/main...HEAD
               Write-Host "Changed files:"
               $changes
@@ -54,6 +56,8 @@ stages:
               Write-Host "##vso[task.setvariable variable=RunBuildStage;isOutput=true]$shouldRunBuild"
               Write-Host "RunBuildStage evaluated to: $shouldRunBuild"
             displayName: 'Set RunBuildStage Variable'
+            env:
+              System.AccessToken: $(System.AccessToken)
 
 
       - job: BPA_SemanticModels
