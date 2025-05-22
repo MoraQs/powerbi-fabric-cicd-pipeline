@@ -6,19 +6,18 @@ trigger:
     include:
       - main
       - feature/*
+<<<<<<< HEAD
   paths:
     include:
       - '**/*.Report/**'
       - '**/*.SemanticModel/**'
+=======
+>>>>>>> 1bbaae4f512547bbba0bd30eacc656d229a18bed
 
 pr:
   branches:
     include:
       - main
-  paths:
-    include:
-      - '**/*.Report/**'
-      - '**/*.SemanticModel/**'
 
 variables:
 - group: PowerBIDevelopmentVariables
@@ -26,27 +25,46 @@ variables:
 pool:
   name: Default
 
-
+# -----------------------------------------------------------------------------------------------------------------------
 # Artifacts BUILD Stage
-
+# -----------------------------------------------------------------------------------------------------------------------
 stages:
   - stage: Build
     displayName: 'Build and BPA Checks'
     jobs:
+      # Evaluate if the build stage should run based on file changes
+      - job: EvaluateBuildRun
+        displayName: 'Evaluate File Changes'
+        steps:
+          - checkout: self
+            fetchDepth: 0
+
+          - powershell: |
+              git fetch origin $(Build.SourceBranchName)
+              $changes = git diff --name-only HEAD~1 HEAD
+              Write-Host "Changed files:"
+              $changes
+              if ($changes -match '\.Report\\' -or $changes -match '\.SemanticModel\\') {
+                  Write-Host "##vso[task.setvariable variable=RunBuildStage]true"
+              } elseif ("$(Build.SourceBranchName)" -eq "main") {
+                  Write-Host "##vso[task.setvariable variable=RunBuildStage]true"
+              } else {
+                  Write-Host "##vso[task.setvariable variable=RunBuildStage]false"
+              }
+            displayName: 'Set RunBuildStage Variable'
+
       - job: BPA_SemanticModels
         displayName: 'BPA Semantic Models'
-        # If using a self-hosted agent, ensure PowerShell is available.
-        # If using a Microsoft-hosted agent, specify vmImage: 'windows-latest'
+        condition: eq(variables['RunBuildStage'], 'true')
         pool:
           name: Default
         steps:
-          - checkout: self # Checks out the repository code
+          - checkout: self
 
           - task: PowerShell@2
             displayName: 'Run BPA on Semantic Models'
             inputs:
               targetType: inline
-              # Assuming .bpa/bpa.ps1 is relative to your repo root
               script: |
                 # Ensure the script is executable or specify full path
                 $scriptPath = "$(Build.SourcesDirectory)\.bpa\bpa.ps1"
@@ -57,6 +75,7 @@ stages:
 
       - job: BPA_Reports
         displayName: 'BPA Reports'
+        condition: eq(variables['RunBuildStage'], 'true')
         pool:
           name: Default
         steps:
@@ -72,12 +91,12 @@ stages:
 
                 & "$scriptPath" -src @("$srcPath\*.Report")
 
-
+# -----------------------------------------------------------------------------------------------------------------------
 # Deployment Stages
-
+# -----------------------------------------------------------------------------------------------------------------------
   - stage: Deploy_DEV
     displayName: 'Deploy to DEV'
-    dependsOn: Build # Run only if Build stage succeeds
+    dependsOn: Build
     condition: succeeded()
     variables:
     - group: PowerBIDevelopmentVariables
@@ -97,7 +116,6 @@ stages:
             deploy:
               steps:
                 - checkout: self
-
                 - script: |
                     "C:\Program Files\Python312\python.exe" --version
                     "C:\Program Files\Python312\python.exe" -m pip install azure-identity fabric-cicd
@@ -106,15 +124,13 @@ stages:
                 - script: |
                     "C:\Program Files\Python312\python.exe" deploy.py ^
                       --spn-auth ^
-                      --workspace "$(dev_workspace_name)" ^
+                      --workspace "$(workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
-                  displayName: 'Run $(environment_name) Deployment Script'
-
+                  displayName: 'Run $(environment_name) Deployment Script'                 
                   env:
-                    FABRIC_CLIENT_ID: $(powerbi_client_id)
-                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
-                    FABRIC_TENANT_ID: $(tenant_id)
-
+                      FABRIC_CLIENT_ID: $(powerbi_client_id)
+                      FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
+                      FABRIC_TENANT_ID: $(tenant_id)
 
   - stage: Deploy_UAT
     displayName: 'Deploy to UAT'
@@ -137,17 +153,17 @@ stages:
             deploy:
               steps:
                 - checkout: self
+
                 - script: |
                     "C:\Program Files\Python312\python.exe" deploy.py ^
                       --spn-auth ^
                       --workspace "$(workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
-                  displayName: 'Run $(environment_name) Deployment Script'
+                  displayName: 'Run $(environment_name) Deployment Script'                 
                   env:
-                    FABRIC_CLIENT_ID: $(powerbi_client_id)
-                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
-                    FABRIC_TENANT_ID: $(tenant_id)
-
+                      FABRIC_CLIENT_ID: $(powerbi_client_id)
+                      FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
+                      FABRIC_TENANT_ID: $(tenant_id)
 
   - stage: Deploy_PROD
     displayName: 'Deploy to PROD'
@@ -170,13 +186,14 @@ stages:
             deploy:
               steps:
                 - checkout: self
+
                 - script: |
                     "C:\Program Files\Python312\python.exe" deploy.py ^
                       --spn-auth ^
                       --workspace "$(workspace_name)" ^
                       --src "$(Build.SourcesDirectory)/src"
-                  displayName: 'Run $(environment_name) Deployment Script'
+                  displayName: 'Run $(environment_name) Deployment Script'                 
                   env:
-                    FABRIC_CLIENT_ID: $(powerbi_client_id)
-                    FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
-                    FABRIC_TENANT_ID: $(tenant_id)
+                      FABRIC_CLIENT_ID: $(powerbi_client_id)
+                      FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
+                      FABRIC_TENANT_ID: $(tenant_id)
