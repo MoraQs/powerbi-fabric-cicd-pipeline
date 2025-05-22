@@ -29,51 +29,9 @@ stages:
   - stage: Build
     displayName: 'Build and BPA Checks'
     jobs:
-      # Evaluate if the build stage should run based on file changes
-      - job: EvaluateBuildRun
-        displayName: 'Evaluate File Changes'
-        steps:
-          - checkout: self
-            fetchDepth: 0
-
-          - powershell: |
-              # Authenticate using pipeline token
-              git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" fetch origin main
-
-              # Check if merge base exists
-              $mergeBase = git merge-base origin/main HEAD 2>$null
-
-              if (-not $mergeBase) {
-                  Write-Host "No merge base between origin/main and HEAD. Defaulting to full diff."
-                  $changes = git diff --name-only HEAD
-              } else {
-                  $changes = git diff --name-only origin/main...HEAD
-              }
-
-              $changes = git diff --name-only origin/main...HEAD
-              Write-Host "Changed files:"
-              $changes
-
-              # Always set the variable to something to avoid 'Null'
-              $shouldRunBuild = $false
-
-              if ("$(Build.SourceBranchName)" -eq "main") {
-                  $shouldRunBuild = $true
-              } elseif ($changes -match '\.Report\\' -or $changes -match '\.SemanticModel\\') {
-                  $shouldRunBuild = $true
-              }
-
-              Write-Host "##vso[task.setvariable variable=RunBuildStage;isOutput=true]$shouldRunBuild"
-              Write-Host "RunBuildStage evaluated to: $shouldRunBuild"
-            displayName: 'Set RunBuildStage Variable'
-            env:
-              System.AccessToken: $(System.AccessToken)
-
-
       - job: BPA_SemanticModels
         dependsOn: EvaluateBuildRun
         displayName: 'BPA Semantic Models'
-        condition: eq(variables['RunBuildStage'], 'true')
         pool:
           name: Default
         steps:
@@ -94,7 +52,6 @@ stages:
       - job: BPA_Reports
         dependsOn: EvaluateBuildRun
         displayName: 'BPA Reports'
-        condition: eq(variables['RunBuildStage'], 'true')
         pool:
           name: Default
         steps:
@@ -154,7 +111,7 @@ stages:
   - stage: Deploy_UAT
     displayName: 'Deploy to UAT'
     dependsOn: Deploy_DEV
-    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
+    condition: succeeded()
     variables:
     - group: PowerBIDevelopmentVariables
     - name: environment_name
