@@ -10,7 +10,7 @@ EVALUATE
 DEFINE 
 MEASURE
     'Sales'[Total Sales] = SUM('Sales'[Sales Amount])
-
+-- try to use the measure in a table
 EVALUATE
     ADDCOLUMNS(
         'Sales',
