@@ -6,11 +6,7 @@ trigger:
     include:
       - main
       - feature/*
-  # paths:
-  #   include:
-  #     - '**/*.Report/**'
-  #     - '**/*.SemanticModel/**'
-
+      
 pr:
   branches:
     include:
@@ -39,7 +35,7 @@ stages:
         steps:
           - checkout: self
             fetchDepth: 0
-            
+
           - powershell: |
               git fetch origin $(Build.SourceBranchName)
               $changes = git diff --name-only HEAD~1 HEAD

@@ -148,7 +148,8 @@ Create a variable group `PowerBIDevelopmentVariables` in Azure DevOps:
 - Triggered on changes to:
   - `**/*.SemanticModel/**`
   - `**/*.Report/**`
-- Feature branches only run the **Build** stage  
+  - `other files`
+- Feature branches only run the **Build → DEV → UAT (on approval)** stage... See `Smart Build Filtering below`
 - Main branch runs full flow: **Build → DEV → UAT → PROD**  
 - UAT/PROD stages gated by branch checks and approval policies
 
@@ -189,3 +190,59 @@ python deploy.py ^
 This script step is placed in the Deploy_DEV, Deploy_UAT, and Deploy_PROD stages of the pipeline.
 
 The environment variables are injected securely via the Azure DevOps variable group (`PowerBIDevelopmentVariables`) and mapped inside the job using the env: block
+
+### 🧠 Smart Build Filtering: Conditional Build Execution
+
+To optimize performance and avoid unnecessary builds, the pipeline includes logic that evaluates which files have changed before deciding to run the `Build` stage.
+
+#### ✅ Behavior
+
+- The `Build` stage **always runs** on pushes to the `main` branch.
+- On `feature/*` branches, the `Build` stage **only runs if** any files in:
+  - `.Report/` (PBIP report folders)
+  - `.SemanticModel/` (PBIP model folders)
+  have changed.
+- If only documentation, `.yml`, or unrelated files were changed (e.g., `README.md`), the `Build` stage is automatically **skipped**.
+
+#### 🔧 YAML Implementation
+
+A special job called `EvaluateBuildRun` is added at the beginning of the `Build` stage:
+
+```yaml
+- job: EvaluateBuildRun
+  displayName: 'Evaluate File Changes'
+  steps:
+    - checkout: self
+      fetchDepth: 0  # Ensure full Git history so HEAD~1 works
+
+    - powershell: |
+        $changes = git diff --name-only HEAD~1 HEAD
+        Write-Host "Changed files:"
+        $changes
+        if ($changes -match '\.Report\\' -or $changes -match '\.SemanticModel\\') {
+            Write-Host "##vso[task.setvariable variable=RunBuildStage]true"
+        } elseif ("$(Build.SourceBranchName)" -eq "main") {
+            Write-Host "##vso[task.setvariable variable=RunBuildStage]true"
+        } else {
+            Write-Host "##vso[task.setvariable variable=RunBuildStage]false"
+        }
+      displayName: 'Set RunBuildStage Variable'
+```
+
+#### 🧪 Example Usage in Build Jobs
+
+Apply the `RunBuildStage` variable as a condition on each Build job:
+
+```yaml
+- job: BPA_SemanticModels
+  displayName: 'BPA Semantic Models'
+  condition: eq(variables['RunBuildStage'], 'true')
+  ...
+
+- job: BPA_Reports
+  displayName: 'BPA Reports'
+  condition: eq(variables['RunBuildStage'], 'true')
+  ...
+```
+
+This setup ensures your CI pipeline is `smart`, `efficient`, and only runs validations when meaningful PBIP model or report changes are introduced.
