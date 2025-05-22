@@ -6,13 +6,10 @@ trigger:
     include:
       - main
       - feature/*
-<<<<<<< HEAD
   paths:
     include:
       - '**/*.Report/**'
       - '**/*.SemanticModel/**'
-=======
->>>>>>> 1bbaae4f512547bbba0bd30eacc656d229a18bed
 
 pr:
   branches:
