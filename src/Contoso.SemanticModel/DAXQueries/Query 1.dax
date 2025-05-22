@@ -6,3 +6,18 @@ EVALUATE
         'Sales',
         'Sales'[Quantity] > 10
     )
+-- This query will fail because the measure is not defined in the context of the table
+-- The measure is defined in the context of the table
+-- The measure is defined in the context of the table
+-- The measure is defined in the context of the table
+DEFINE 
+MEASURE
+    'Sales'[Total Sales] = SUM('Sales'[Sales Amount])
+-- try to use the measure in a table
+EVALUATE
+    ADDCOLUMNS(
+        'Sales',
+        "Total Sales", [Total Sales]
+    )
+
+-- This query will fail because the measure is not defined in the context of the table
