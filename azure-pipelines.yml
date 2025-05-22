@@ -33,12 +33,33 @@ stages:
   - stage: Build
     displayName: 'Build and BPA Checks'
     jobs:
+      # Evaluate if the build stage should run based on file changes
+      - job: EvaluateBuildRun
+        displayName: 'Evaluate File Changes'
+        steps:
+          - checkout: self
+
+          - powershell: |
+              git fetch origin $(Build.SourceBranchName)
+              $changes = git diff --name-only HEAD~1 HEAD
+              Write-Host "Changed files:"
+              $changes
+              if ($changes -match '\.Report\\' -or $changes -match '\.SemanticModel\\') {
+                  Write-Host "##vso[task.setvariable variable=RunBuildStage]true"
+              } elseif ("$(Build.SourceBranchName)" -eq "main") {
+                  Write-Host "##vso[task.setvariable variable=RunBuildStage]true"
+              } else {
+                  Write-Host "##vso[task.setvariable variable=RunBuildStage]false"
+              }
+            displayName: 'Set RunBuildStage Variable'
+
       - job: BPA_SemanticModels
         displayName: 'BPA Semantic Models'
+        condition: eq(variables['RunBuildStage'], 'true')
         pool:
           name: Default
         steps:
-          - checkout: self # Checks out the repository code
+          - checkout: self
 
           - task: PowerShell@2
             displayName: 'Run BPA on Semantic Models'
@@ -54,6 +75,7 @@ stages:
 
       - job: BPA_Reports
         displayName: 'BPA Reports'
+        condition: eq(variables['RunBuildStage'], 'true')
         pool:
           name: Default
         steps:
