@@ -1,14 +1,13 @@
-# 📘 Power BI (.pbip) CI/CD Pipeline with Fabric and Azure DevOps
+# 📘 Power BI (.pbip) CI/CD Pipeline with Azure DevOps and fabric-cicd
 
 ## 🚀 Overview
 
 This repository implements a **CI/CD pipeline** for deploying **Power BI `.pbip` semantic models and reports** to Microsoft Fabric workspaces across environments (**DEV → UAT → PROD**) using:
 
-- Azure DevOps Pipelines  
-- `fabric-cicd` Python CLI  
-- Service Principal (SPN) authentication  
-- Self-hosted agent (Windows)  
-- Dataset refresh via Power BI REST API
+- Azure DevOps Pipelines
+- `fabric-cicd` Python CLI
+- Service Principal (SPN) authentication
+- Self-hosted agent (Windows)
 
 ## ✅ Key Features
 
@@ -16,7 +15,6 @@ This repository implements a **CI/CD pipeline** for deploying **Power BI `.pbip`
 - **Build-only validation for `feature/*`**
 - **Multi-stage deployment: DEV → UAT → PROD**
 - **Secure SPN-based authentication**
-- **Post-deployment dataset refresh**
 - **Environment-based variables via Azure DevOps Variable Groups**
 
 ## ⚙️ Prerequisites
@@ -28,7 +26,7 @@ This repository implements a **CI/CD pipeline** for deploying **Power BI `.pbip`
   - `Workspace.Read.All`
 - SPN added as **Admin** or **Member** on target workspaces
 - A **self-hosted Windows agent** with:
-  - Python 3+
+  - Python 3.12+
   - `fabric-cicd` installed (`pip install fabric-cicd`)
 
 ## 1. 🛠️ Step-by-Step Setup
@@ -43,13 +41,12 @@ Before creating your Service Principal (SPN) and configuring your Azure DevOps p
 3. Locate the option:  
    ✅ **"Service principals can use Fabric APIs"**
 4. Set this to **Enabled**
-5. *(Recommended)* Restrict access by specifying an Azure AD Security Group or App ID under **"Apply to specific security groups"**
 
 > ⚠️ If this setting is not enabled, your SPN will not be able to authenticate with the Fabric service.
 
 ### 🔐 Step 0.2: Create Service Principal in Entra ID & Generate Client Secret
 
-You’ll need a **Service Principal (SPN)** to authenticate programmatically with Microsoft Fabric via Azure DevOps during deployment and dataset refresh.
+You’ll need a **Service Principal (SPN)** to authenticate programmatically with Microsoft Fabric via Azure DevOps during deployment.
 
 #### 🧾 Follow these steps in Microsoft Entra ID (Azure Portal)
 
@@ -58,18 +55,17 @@ You’ll need a **Service Principal (SPN)** to authenticate programmatically wit
 1. Go to the **[Azure Portal](https://portal.azure.com)**
 2. Navigate to: **Microsoft Entra ID** → **App registrations**
 3. Click **New registration**
-   - **Name**: `PowerBI-Fabric-CICD`
-   - **Supported account types**: **Single tenant** (recommended)
+   - **Name**: e.g., `PowerBI-Fabric-CICD`
    - Click **Register**
 
 #### 🔹 2. Copy the Client ID and Tenant ID
 
 After registration, go to the app’s **Overview** page and copy:
 
-- `Application (client) ID` → Use this as `powerbi_client_id`
-- `Directory (tenant) ID` → Use this as `tenant_id`
+- `Application (client) ID`
+- `Directory (tenant) ID`
 
-Save them securely for Azure DevOps.
+Save them securely for Azure DevOps variable group creation.
 
 #### 🔹 3. Create a Client Secret
 
@@ -78,7 +74,7 @@ Save them securely for Azure DevOps.
    - Add a description: e.g., `CI/CD Deployment Key`
    - Set an expiration period (e.g., 6 or 12 months)
 3. Click **Add**
-4. Copy the **Value** immediately — use this as `powerbi_client_secret`
+4. Copy the **Value** immediately
 
 > ⚠️ **Important:** You won’t be able to view the secret again once you leave the page.
 
@@ -112,7 +108,7 @@ Create separate workspaces for each deployment environment in Microsoft Fabric:
 
 These will be used to isolate deployments by environment stage.
 
-#### **Grant the group access to each Fabric workspace (DEV, UAT, PROD)**  
+#### **Grant access to the security group `FabricPipelineDeployer` in each Fabric workspace (DEV, UAT, PROD)**  
 
 - Go to the Fabric workspace → **Manage access**
 - Add `FabricPipelineDeployer` group
@@ -120,27 +116,27 @@ These will be used to isolate deployments by environment stage.
 
 > 🧠 This avoids hardcoding the SPN per workspace and follows RBAC best practices.
 
-### 🧾 Step 0.4: Create and Set-up Azure DevOps Variables
+### 🧾 Step 0.4: Create and Set-up Azure DevOps Variable group
 
-Create a variable group `PowerBIDevelopmentVariables` in Azure DevOps:
+Create a variable group e.g., `PowerBIDevelopmentVariables` in Azure DevOps:
 
 | Variable Name             | Value                            | Secret |
 |---------------------------|----------------------------------|--------|
-| `powerbi_client_id`       | SPN client ID                    | ✅     |
-| `powerbi_client_secret`   | SPN secret                       | ✅     |
-| `tenant_id`               | Microsoft ENTRA Tenant ID        | ❌     |
+| `powerbi_client_id`       | Application (client) ID          | ✅     |
+| `powerbi_client_secret`   | Client Secret (Value)            | ✅     |
+| `tenant_id`               | Directory (tenant) ID            | ❌     |
 | `workspace_name_dev`      | e.g., `ContosoDEV`               | ❌     |
 | `workspace_name_uat`      | e.g., `ContosoUAT`               | ❌     |
 | `workspace_name_prod`     | e.g., `Contoso`                  | ❌     |
-| `dataset_name`            | Name of your Semantic Model      | ❌     |
+| `workspace_id`(Each wrksp)| `xxxxxxxx-xxxx-xxxx-xxxx-xxx...` | ❌     |
 
 `workspace_id` is the `uuid`, which is a part of your workspace URL. See example below:
 `https://app.powerbi.com/groups/`xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`/list?redirectedFromSignup=1&experience=power-bi&clientSideAuth=0`
 
 ## 2. 🌿 Branching Strategy
 
-- `main`: Used for UAT and PROD deployment  
-- `feature/*`: Used for build-only validation  
+- `main`: Used for **PROD** deployment
+- `feature/*`: Used for **DEV → UAT**
 - PRs from `feature/* → main` trigger validation builds
 
 ### 🚦Pipeline Behavior
@@ -148,23 +144,14 @@ Create a variable group `PowerBIDevelopmentVariables` in Azure DevOps:
 - Triggered on changes to:
   - `**/*.SemanticModel/**`
   - `**/*.Report/**`
-  - `other files`
-- Feature branches only run the **Build → DEV → UAT (on approval)** stage... See `Smart Build Filtering below`
-- Main branch runs full flow: **Build → DEV → UAT → PROD**  
+
+- Feature branches only run the **Build → DEV → UAT** stages if changes are made to the  `Semantic Model & Report folders`
+- Main branch runs full flow: **Build → DEV → UAT → PROD** provided that changes are made to the `Semantic Model & Report folders`
 - UAT/PROD stages gated by branch checks and approval policies
 
 ### 🚚 Deployment Script: `deploy.py`
 
 This script uses `fabric-cicd` to deploy both **Power BI semantic models** and **reports** to a Microsoft Fabric workspace.
-
-#### 🧪 How to Run Locally (for testing)
-
-```bash
-python deploy.py ^
-  --spn-auth ^
-  --workspace "Contoso DEV" ^
-  --src "./src"
-```
 
 ⚠️ Make sure the following environment variables are set in your shell:
 
@@ -191,58 +178,9 @@ This script step is placed in the Deploy_DEV, Deploy_UAT, and Deploy_PROD stages
 
 The environment variables are injected securely via the Azure DevOps variable group (`PowerBIDevelopmentVariables`) and mapped inside the job using the env: block
 
-### 🧠 Smart Build Filtering: Conditional Build Execution
+### 🚧 Next Steps / Future Improvements
 
-To optimize performance and avoid unnecessary builds, the pipeline includes logic that evaluates which files have changed before deciding to run the `Build` stage.
-
-#### ✅ Behavior
-
-- The `Build` stage **always runs** on pushes to the `main` branch.
-- On `feature/*` branches, the `Build` stage **only runs if** any files in:
-  - `.Report/` (PBIP report folders)
-  - `.SemanticModel/` (PBIP model folders)
-  have changed.
-- If only documentation, `.yml`, or unrelated files were changed (e.g., `README.md`), the `Build` stage is automatically **skipped**.
-
-#### 🔧 YAML Implementation
-
-A special job called `EvaluateBuildRun` is added at the beginning of the `Build` stage:
-
-```yaml
-- job: EvaluateBuildRun
-  displayName: 'Evaluate File Changes'
-  steps:
-    - checkout: self
-      fetchDepth: 0  # Ensure full Git history so HEAD~1 works
-
-    - powershell: |
-        $changes = git diff --name-only HEAD~1 HEAD
-        Write-Host "Changed files:"
-        $changes
-        if ($changes -match '\.Report\\' -or $changes -match '\.SemanticModel\\') {
-            Write-Host "##vso[task.setvariable variable=RunBuildStage]true"
-        } elseif ("$(Build.SourceBranchName)" -eq "main") {
-            Write-Host "##vso[task.setvariable variable=RunBuildStage]true"
-        } else {
-            Write-Host "##vso[task.setvariable variable=RunBuildStage]false"
-        }
-      displayName: 'Set RunBuildStage Variable'
-```
-
-#### 🧪 Example Usage in Build Jobs
-
-Apply the `RunBuildStage` variable as a condition on each Build job:
-
-```yaml
-- job: BPA_SemanticModels
-  displayName: 'BPA Semantic Models'
-  condition: eq(variables['RunBuildStage'], 'true')
-  ...
-
-- job: BPA_Reports
-  displayName: 'BPA Reports'
-  condition: eq(variables['RunBuildStage'], 'true')
-  ...
-```
-
-This setup ensures your CI pipeline is `smart`, `efficient`, and only runs validations when meaningful PBIP model or report changes are introduced.
+- **Automate Semantic Model Dataset Refresh**
+  > Although the deployment pipeline currently handles `.pbip` artifact publishing (Semantic Models and Reports), the automatic refresh of datasets post-deployment has been removed temporarily.
+  
+  ✅ **Goal**: Trigger a semantic model dataset refresh via the Power BI REST API or `fabric-cicd` SDK after each environment deployment (DEV, UAT, PROD).

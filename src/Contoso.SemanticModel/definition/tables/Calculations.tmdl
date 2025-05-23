@@ -1,24 +1,6 @@
 table Calculations
 	lineageTag: 86a1133f-8570-449f-976b-eea8050ac94b
 
-	measure Var1 = ```
-			
-			
-			VAR __salesAmount = [Total Sales Amount] 
-			
-			VAR __totalProfit = [Profit]
-			
-			VAR __profitMargin = DIVIDE( __totalProfit , __salesAmount )
-			
-			RETURN __salesAmount
-			```
-		formatString: #,0
-		lineageTag: 991177c0-c49a-4ae3-977e-228e57e56644
-
-	measure 'Total Sales EF' = CALCULATE([Total Sales Amount], 'Date'[Year] = 2011, 'Date'[Quarter] = "Q4", 'Geography'[Country] = "United States")
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: 9634a635-42f1-4165-85f7-d3070ff1ea02
-
 	measure 'Total Sales Amount' = SUMX( 'Sales', 'Sales'[Unit Price] * ('Sales'[Sales Quantity] - 'Sales'[Return Quantity] - 'Sales'[Discount Quantity]) )
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		lineageTag: 88a8133b-a5c6-4035-9898-92fc1fe483e8
@@ -38,10 +20,6 @@ table Calculations
 		formatString: #,0
 		lineageTag: bbe28271-72e5-472b-a325-314f13d10098
 
-	measure 'Sales YTD 2' = TOTALYTD([Total Sales Amount], 'Date'[Date])
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: f30f6908-e332-4c55-a63d-e134c015f905
-
 	measure 'Sales YTD' = CALCULATE([Total Sales Amount], DATESYTD('Date'[Date]))
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		lineageTag: 72642fe1-d0f5-47fd-a070-c2125eae7dd8
@@ -49,28 +27,6 @@ table Calculations
 	measure 'Sales SPLY' = CALCULATE([Total Sales Amount], SAMEPERIODLASTYEAR('Date'[Date]))
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		lineageTag: cdc2919a-41f5-49b2-a035-6a320dd9fdea
-
-	measure 'Sales Amount RF' = CALCULATE( [Total Sales Amount], ALLSELECTED() )
-		formatString: #,0
-		lineageTag: a5f63983-3f03-418d-aaed-0d8600acaa08
-
-	measure 'Sales Amount PY' = CALCULATE([Total Sales Amount], 'Date'[Year] = MAX('Date'[Year]) -1)
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: ba2a21eb-ec2e-40fa-ac5c-a492c40b7ea4
-
-	measure 'Sales Amount CY' = CALCULATE([Total Sales Amount], 'Date'[Year] = MAX('Date'[Year]))
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
-		lineageTag: 5a53fe61-fbf6-4fa8-9480-1048e2a91408
-
-	measure 'Sales Amount AllExcept' =
-			
-			
-			CALCULATE(
-			    [Total Sales Amount],
-			    ALLEXCEPT(Sales, 'Date'[Month], Channel[Channel Name], 'Product'[Brand Name])
-			)
-		formatString: #,0
-		lineageTag: d66ff263-9e1b-43d6-ba06-f2e5a37cd7d4
 
 	measure Ranking =
 			
