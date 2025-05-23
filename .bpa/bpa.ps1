@@ -95,6 +95,9 @@ foreach ($srcPath in $src) {
 
             Write-Host "Running Tabular Editor BPA rules for: '$itemPath'"
 
+            # Runs Tabular Editor BPA using the specified rule file (-A), 
+            # exits with a non-zero code if any rule with Severity "Error" or 1 is violated (-E),
+            # and formats output using GitHub style (-G) for consistent logging in DevOps.
             $process = Start-Process -FilePath $tabularEditorEXE -ArgumentList """$itemPath"" -A ""$tabularEditorRulesPath"" -G" -NoNewWindow -Wait -PassThru    
 
             if ($process.ExitCode -ne 0) {
@@ -117,7 +120,7 @@ foreach ($srcPath in $src) {
             $process = Start-Process -FilePath $pbiInspectorEXE -ArgumentList "-pbipreport ""$itemPath"" -rules ""$pbiInspectorRulesPath"" -formats ""GitHub""" -NoNewWindow -Wait -PassThru    
 
             if ($process.ExitCode -ne 0) {
-                # throw "Error running BPA rules for: '$itemPath'"          ## Bypassed for now, the default "Best Practice Analyzer" rules.
+                throw "Error running BPA rules for: '$itemPath'"
                 Write-Host "BPA violations found in: '$itemPath'. Continuing execution..."
             }    
         }

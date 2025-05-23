@@ -186,3 +186,10 @@ python deploy.py ^
 This script step is placed in the Deploy_DEV, Deploy_UAT, and Deploy_PROD stages of the pipeline.
 
 The environment variables are injected securely via the Azure DevOps variable group (`PowerBIDevelopmentVariables`) and mapped inside the job using the env: block
+
+### 🚧 Next Steps / Future Improvements
+
+- **Automate Semantic Model Dataset Refresh**
+  > Although the deployment pipeline currently handles `.pbip` artifact publishing (Semantic Models and Reports), the automatic refresh of datasets post-deployment has been removed temporarily.
+  
+  ✅ **Goal**: Trigger a semantic model dataset refresh via the Power BI REST API or `fabric-cicd` SDK after each environment deployment (DEV, UAT, PROD).
