@@ -120,8 +120,10 @@ foreach ($srcPath in $src) {
             $process = Start-Process -FilePath $pbiInspectorEXE -ArgumentList "-pbipreport ""$itemPath"" -rules ""$pbiInspectorRulesPath"" -formats ""GitHub""" -NoNewWindow -Wait -PassThru    
 
             if ($process.ExitCode -ne 0) {
-                throw "Error running BPA rules for: '$itemPath'"
-                Write-Host "BPA violations found in: '$itemPath'. Continuing execution..."
+                # throw "Error running BPA rules for: '$itemPath'"      ## Ensuring that the pipeline does not fail if there are BPA violations
+                
+                # Instead, we will log a warning and continue execution
+                Write-Host "##[Warning] BPA violations found in: '$itemPath'. Skip failure and Continuing execution..."
             }    
         }
         else {

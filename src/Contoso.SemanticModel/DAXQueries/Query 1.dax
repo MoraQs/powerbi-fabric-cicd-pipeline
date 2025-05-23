@@ -1,2 +1,4 @@
 EVALUATE
     TOPN(100, 'Sales')
+
+EVALUATE Channel

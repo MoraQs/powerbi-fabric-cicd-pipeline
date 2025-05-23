@@ -153,15 +153,6 @@ Create a variable group e.g., `PowerBIDevelopmentVariables` in Azure DevOps:
 
 This script uses `fabric-cicd` to deploy both **Power BI semantic models** and **reports** to a Microsoft Fabric workspace.
 
-#### 🧪 How to Run Locally (for testing)
-
-```bash
-python deploy.py ^
-  --spn-auth ^
-  --workspace "Contoso DEV" ^
-  --src "./src"
-```
-
 ⚠️ Make sure the following environment variables are set in your shell:
 
 - "`FABRIC_CLIENT_ID`"
