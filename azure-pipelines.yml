@@ -50,7 +50,6 @@ stages:
 
       - job: BPA_Reports
         displayName: 'BPA Reports'
-        condition: eq(variables['RunBuildStage'], 'true')
         pool:
           name: Default
         steps:
