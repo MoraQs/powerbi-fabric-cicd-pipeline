@@ -5,10 +5,10 @@ table Geography
 		dataType: int64
 		isHidden
 		formatString: 0
+		isAvailableInMdx: false
 		lineageTag: da479c89-a697-452d-b049-3d7e0dc3daa3
 		summarizeBy: none
 		sourceColumn: geographykey
-		isAvailableInMdx: false
 
 		changedProperty = IsHidden
 

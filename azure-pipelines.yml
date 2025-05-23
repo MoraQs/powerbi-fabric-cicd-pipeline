@@ -43,7 +43,7 @@ stages:
               script: |
                 # Ensure the script is executable or specify full path
                 $scriptPath = "$(Build.SourcesDirectory)\.bpa\bpa.ps1"
-                $srcPath = "$(Build.SourcesDirectory)\src" # Assuming your PBIP components are in a 'src' folder
+                $srcPath = "$(Build.SourcesDirectory)\src"
 
                 # Correctly pass array arguments to PowerShell script
                 & "$scriptPath" -src @("$srcPath\*.SemanticModel")
@@ -62,7 +62,7 @@ stages:
               targetType: inline
               script: |
                 $scriptPath = "$(Build.SourcesDirectory)\.bpa\bpa.ps1"
-                $srcPath = "$(Build.SourcesDirectory)\src" # Assuming your PBIP components are in a 'src' folder
+                $srcPath = "$(Build.SourcesDirectory)\src"
 
                 & "$scriptPath" -src @("$srcPath\*.Report")
 
