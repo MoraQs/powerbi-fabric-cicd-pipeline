@@ -91,7 +91,6 @@ stages:
               steps:
                 - checkout: self
                 - script: |
-                    "C:\Program Files\Python312\python.exe" --version
                     "C:\Program Files\Python312\python.exe" -m pip install azure-identity fabric-cicd
                   displayName: 'Install Python Packages'
 
