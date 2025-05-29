@@ -1,72 +1,86 @@
 table Product
-	lineageTag: 7adaff7b-3d45-419f-ac5b-edfa62abffbb
+	lineageTag: 05c038cd-d5c4-421f-bd4f-80df06d55ce7
 
-	column 'Product Name'
+	column ProductName
 		dataType: string
-		lineageTag: aed13bca-31d7-4126-bb89-ae823a77431b
+		lineageTag: 8ee83698-d5a4-4d77-baf1-6f27f5d55849
 		summarizeBy: none
-		sourceColumn: Product Name
+		sourceColumn: ProductName
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Product Description'
+	column ProductDescription
 		dataType: string
-		lineageTag: 347bc644-bf45-4322-a61d-0cb477f27e68
+		lineageTag: d0b2fe20-0b1e-4152-9456-6d2da4f6c697
 		summarizeBy: none
-		sourceColumn: Product Description
+		sourceColumn: ProductDescription
 
 		annotation SummarizationSetBy = Automatic
 
-	column manufacturer
+	column Manufacturer
 		dataType: string
-		lineageTag: 0a2b4086-4725-4692-b2c3-c6b165a93824
+		lineageTag: c371e24b-e312-425b-ba3b-bcaa6de0782b
 		summarizeBy: none
-		sourceColumn: manufacturer
+		sourceColumn: Manufacturer
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Brand Name'
+	column BrandName
 		dataType: string
-		lineageTag: 16556254-da0c-44ca-922c-afd8d312929b
+		lineageTag: c0742517-388c-4bff-b2f3-b5646dd83082
 		summarizeBy: none
-		sourceColumn: Brand Name
+		sourceColumn: BrandName
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Class Name'
+	column ClassName
 		dataType: string
-		lineageTag: d9cc4cea-76fe-4975-8e3c-324517b992db
+		lineageTag: f8fa30ac-7bcc-4345-b66a-41718421f3ec
 		summarizeBy: none
-		sourceColumn: Class Name
+		sourceColumn: ClassName
 
 		annotation SummarizationSetBy = Automatic
 
-	column productkey
+	column UnitCost
 		dataType: int64
-		isHidden
 		formatString: 0
-		isAvailableInMdx: false
-		lineageTag: 1804ed8c-8466-42b2-9590-d66e2cd75aa7
+		lineageTag: 4643e514-910c-40bf-a959-b06975de2a4d
 		summarizeBy: none
-		sourceColumn: productkey
-
-		changedProperty = IsHidden
+		sourceColumn: UnitCost
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Product Subcategory'
-		dataType: string
-		lineageTag: d77e22d6-82b1-495e-9b16-c268ca8162eb
+	column UnitPrice
+		dataType: int64
+		formatString: 0
+		lineageTag: a4a0189d-639e-4d77-a8ab-54a98321682b
 		summarizeBy: none
-		sourceColumn: Product Subcategory
+		sourceColumn: UnitPrice
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Product Category'
-		dataType: string
-		lineageTag: 8a793e2c-e5d9-4210-a74e-a4e27c810b9a
+	column ProductKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 59a17cff-99eb-4476-a377-f8ca60032951
 		summarizeBy: none
-		sourceColumn: Product Category
+		sourceColumn: ProductKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductSubcategory
+		dataType: string
+		lineageTag: 1db130c3-757b-4814-81dc-42f1b92ae3f8
+		summarizeBy: none
+		sourceColumn: ProductSubcategory
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductCategory
+		dataType: string
+		lineageTag: a7680202-35ad-4cf3-9e2a-e776adc15e55
+		summarizeBy: none
+		sourceColumn: ProductCategory
 
 		annotation SummarizationSetBy = Automatic
 
@@ -74,11 +88,12 @@ table Product
 		mode: import
 		source =
 				let
-				    Source = PostgreSQL.Database("localhost", "contoso_db"),
-				    public_product = Source{[Schema="public",Item="product"]}[Data],
-				    #"Removed Other Columns" = Table.SelectColumns(public_product,{"Product Name", "Product Description", "manufacturer", "Brand Name", "Class Name", "productkey", "Product Subcategory", "Product Category"})
+				    Source = GoogleSheets.Contents("https://docs.google.com/spreadsheets/d/1vC83yF8tJNvvqA3TabYA1Q9YY1qM2jOZ2nj3FKj__KU/edit?gid=1345312637#gid=1345312637"),
+				    Product_Table = Source{[name="Product",ItemKind="Table"]}[Data],
+				    #"Promoted Headers" = Table.PromoteHeaders(Product_Table, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"ProductName", type text}, {"ProductDescription", type text}, {"Manufacturer", type text}, {"BrandName", type text}, {"ClassName", type text}, {"UnitCost", Int64.Type}, {"UnitPrice", Int64.Type}, {"ProductKey", Int64.Type}, {"ProductSubcategory", type text}, {"ProductCategory", type text}})
 				in
-				    #"Removed Other Columns"
+				    #"Changed Type"
 
 	annotation PBI_NavigationStepName = Navigation
 

@@ -106,6 +106,117 @@ stages:
                       FABRIC_CLIENT_SECRET: $(powerbi_client_secret)
                       FABRIC_TENANT_ID: $(tenant_id)
 
+      - job: ConfigureDevRefresh # UPDATED JOB STARTS HERE
+        displayName: 'Configure DEV Semantic Model and Refresh (Google Sheet)'
+        dependsOn: DeployFabricItems # Ensure this runs after the deployment job
+        pool:
+          name: Default # Use the same pool as your deployment job
+        variables:
+          # Variables from PowerBIDevelopmentVariables:
+          - name: workspaceId
+            value: $(dev_workspace_id)
+          - name: semanticModelName
+            value: $(ContosoSemanticModelName)
+          - name: ClientId
+            value: $(powerbi_client_id)
+          - name: ClientSecret
+            value: $(powerbi_client_secret)
+          - name: tenantId
+            value: $(tenant_id)
+          - name: SourceUrl
+            value: $(source_data_url)
+
+        steps:
+        - task: PowerShell@2
+          displayName: 'Get Google Sheet Data Source ID & Trigger Refresh'
+          inputs:
+            targetType: 'inline'
+            script: |
+              #region Parameters
+              # Access variables directly from the linked variable group
+              $clientId = "$(powerbi_client_id)"
+              $clientSecret = "$(powerbi_client_secret)"
+              $tenantId = "$(tenant_id)"
+              $workspaceId = "$(dev_workspace_id)"
+              $semanticModelName = "$(ContosoSemanticModelName)"
+              $googleSheetUrl = "$(source_data_url)"
+
+              #endregion
+
+              Write-Host "Authenticating Service Principal..."
+              $body = @{
+                  grant_type = "client_credentials"
+                  client_id = $clientId
+                  client_secret = $clientSecret
+                  resource = "https://analysis.windows.net/powerbi/api"
+              } | ConvertTo-Json
+
+              try {
+                  $tokenResponse = Invoke-RestMethod -Method Post -Uri "https://login.microsoftonline.com/$tenantId/oauth2/token" -ContentType "application/x-www-form-urlencoded" -Body $body
+                  $accessToken = $tokenResponse.access_token
+                  Write-Host "Service Principal authenticated successfully."
+              } catch {
+                  Write-Error "Failed to authenticate Service Principal: $($_.Exception.Message)"
+                  exit 1
+              }
+
+              $headers = @{
+                  Authorization = "Bearer $accessToken"
+              }
+
+              # 1. Get the Semantic Model ID
+              Write-Host "Getting semantic model ID for '$semanticModelName' in workspace '$workspaceId'..."
+              try {
+                  $datasets = Invoke-RestMethod -Method Get -Uri "https://api.powerbi.com/v1.0/myorg/groups/$workspaceId/datasets" -Headers $headers
+                  $semanticModel = $datasets.value | Where-Object { $_.name -eq $semanticModelName }
+
+                  if (-not $semanticModel) {
+                      Write-Error "Semantic model '$semanticModelName' not found in workspace '$workspaceId'."
+                      exit 1
+                  }
+                  $datasetId = $semanticModel.id
+                  Write-Host "Found semantic model ID: $datasetId"
+              } catch {
+                  Write-Error "Failed to get semantic model ID: $($_.Exception.Message)"
+                  exit 1
+              }
+
+              # 2. Get Data Sources associated with the Semantic Model
+              Write-Host "Getting data sources for semantic model '$semanticModelName'..."
+              try {
+                  $dataSources = Invoke-RestMethod -Method Get -Uri "https://api.powerbi.com/v1.0/myorg/groups/$workspaceId/datasets/$datasetId/datasources" -Headers $headers
+
+                  # Find the Google Sheet data source by its URL (as it appears in Power BI's connection details)
+                  # The 'url' in connectionDetails will contain the Google Sheet link
+                  $targetDataSource = $dataSources.value | Where-Object { $_.connectionDetails.url -like "$googleSheetUrl*" } # Use -like for partial match if needed
+
+                  if (-not $targetDataSource) {
+                      Write-Error "Google Sheet data source with URL '$googleSheetUrl' not found in dataset '$semanticModelName'. Verify the URL or manual setup."
+                      exit 1
+                  }
+                  $targetDataSourceId = $targetDataSource.id
+                  Write-Host "Found target Google Sheet data source ID: $targetDataSourceId"
+              } catch {
+                  Write-Error "Failed to get data sources for semantic model: $($_.Exception.Message)"
+                  exit 1
+              }
+
+              # Important: For Google Sheets (OAuth), the credentials are set manually in Power BI Service.
+              # This script does NOT update credentials directly due to OAuth's interactive nature.
+              Write-Host "Skipping credential update for Google Sheet - assuming manual setup in Power BI Service."
+
+              # 3. Trigger Dataset Refresh
+              Write-Host "Triggering dataset refresh for $semanticModelName..."
+              try {
+                  Invoke-RestMethod -Method Post -Uri "https://api.powerbi.com/v1.0/myorg/groups/$workspaceId/datasets/$datasetId/refreshes" `
+                      -Headers $headers -ContentType "application/json"
+                  Write-Host "Dataset refresh triggered successfully."
+              } catch {
+                  Write-Error "Failed to trigger dataset refresh: $($_.Exception.Message)"
+                  exit 1
+              }
+         
+
   - stage: Deploy_UAT
     displayName: 'Deploy to UAT'
     dependsOn: Deploy_DEV

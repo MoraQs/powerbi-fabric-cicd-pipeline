@@ -1,24 +1,28 @@
-relationship AutoDetected_1caabd8e-b19d-4bcf-9f33-97d2c3fff891
-	fromColumn: Sales.productkey
-	toColumn: Product.productkey
+relationship AutoDetected_bb9400e5-ab38-4751-ac94-1458494821f5
+	fromColumn: Sales.GeographyKey
+	toColumn: Geography.GeographyKey
 
-relationship AutoDetected_752616fe-dfe3-461c-b65d-6ff2b423656b
-	fromColumn: Sales.promotionkey
-	toColumn: Promotion.'Promotion Key'
+relationship AutoDetected_8fd0bb8a-5909-4438-82e8-446a2c6f8dc6
+	fromColumn: Sales.ProductKey
+	toColumn: Product.ProductKey
 
-relationship AutoDetected_3d524b2f-91dd-4fcc-bf20-2996f0e5fcab
-	fromColumn: Sales.storekey
-	toColumn: Stores.storekey
+relationship AutoDetected_8fd96635-ad15-4ae2-80c9-2ecc4d54e1f4
+	fromColumn: Sales.PromotionKey
+	toColumn: Promotion.PromotionKey
 
-relationship 1ada37f8-49e6-e93c-8546-ca7597e06a31
-	fromColumn: Sales.channelkey
-	toColumn: Channel.'Channel ID'
+relationship AutoDetected_8fbd219c-a044-4b58-a2c5-a1bcc9f7ba2a
+	fromColumn: Sales.StoreKey
+	toColumn: Stores.StoreKey
 
-relationship d67a23bc-abaa-46ba-64cd-5887217c4d72
-	fromColumn: Sales.geographykey
-	toColumn: Geography.geographykey
+relationship AutoDetected_c02a8256-54c8-462f-b952-9b12a5750d04
+	fromColumn: Sales.channelKey
+	toColumn: Channel.ChannelID
 
-relationship c4426c87-86e8-2b79-a406-7bba4f8fcba6
-	fromColumn: Sales.date
+relationship 761c4466-a4f8-df26-b448-b7ea38c7ced5
+	fromColumn: Sales.Date
 	toColumn: Date.Date
+
+relationship c9061672-0813-99f5-2a24-31b93146af6e
+	fromColumn: Sales.Date
+	toColumn: 'Fiscal Date Table'.Date
 

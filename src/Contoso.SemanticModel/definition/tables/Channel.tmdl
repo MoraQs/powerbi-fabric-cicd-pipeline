@@ -1,20 +1,20 @@
 table Channel
-	lineageTag: 94e9f9c8-b0c9-4731-8c50-ef071b34417c
+	lineageTag: 8cdc8586-d50f-484f-baa5-83241ee5b328
 
-	column 'Channel ID'
+	column ChannelID
 		dataType: int64
 		formatString: 0
-		lineageTag: fb0c3d87-710d-4bfe-a80d-3ca2b3629ad5
+		lineageTag: 98bd36ba-c394-442a-9611-4a137a3ccecc
 		summarizeBy: none
-		sourceColumn: Channel ID
+		sourceColumn: ChannelID
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Channel Name'
+	column ChannelName
 		dataType: string
-		lineageTag: e5024df3-c57e-43b0-a25a-7508eceba987
+		lineageTag: e87c3716-ff81-42ee-a7da-4abd49502d06
 		summarizeBy: none
-		sourceColumn: Channel Name
+		sourceColumn: ChannelName
 
 		annotation SummarizationSetBy = Automatic
 
@@ -22,10 +22,12 @@ table Channel
 		mode: import
 		source =
 				let
-				    Source = PostgreSQL.Database("localhost", "contoso_db"),
-				    public_channels = Source{[Schema="public",Item="channels"]}[Data]
+				    Source = GoogleSheets.Contents("https://docs.google.com/spreadsheets/d/1vC83yF8tJNvvqA3TabYA1Q9YY1qM2jOZ2nj3FKj__KU/edit?gid=1345312637#gid=1345312637"),
+				    Channel_Table = Source{[name="Channel",ItemKind="Table"]}[Data],
+				    #"Promoted Headers" = Table.PromoteHeaders(Channel_Table, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"ChannelID", Int64.Type}, {"ChannelName", type text}})
 				in
-				    public_channels
+				    #"Changed Type"
 
 	annotation PBI_NavigationStepName = Navigation
 

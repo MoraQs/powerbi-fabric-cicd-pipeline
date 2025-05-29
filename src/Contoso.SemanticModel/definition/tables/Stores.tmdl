@@ -1,31 +1,27 @@
 table Stores
-	lineageTag: 826aa8b6-84b1-47b7-b8c7-e8c9a4bfc11c
+	lineageTag: 2ff89e8d-66bf-4b6b-a70b-06e927a4ef6f
 
-	column storekey
+	column StoreKey
 		dataType: int64
-		isHidden
 		formatString: 0
-		isAvailableInMdx: false
-		lineageTag: 11dbb0ed-2f73-4725-80a6-9e25cf32b61a
+		lineageTag: 21c0f334-21c2-460f-8f2b-867859c74df7
 		summarizeBy: none
-		sourceColumn: storekey
-
-		changedProperty = IsHidden
+		sourceColumn: StoreKey
 
 		annotation SummarizationSetBy = Automatic
 
-	column geographykey
+	column GeographyKey
 		dataType: int64
 		formatString: 0
-		lineageTag: bc48ebe2-2420-471a-a341-7db6c7f1214e
+		lineageTag: cd59a41d-5e63-4bf3-9f6d-0e3c94f05482
 		summarizeBy: none
-		sourceColumn: geographykey
+		sourceColumn: GeographyKey
 
 		annotation SummarizationSetBy = Automatic
 
 	column 'Store Type'
 		dataType: string
-		lineageTag: be32da9d-01ab-447f-8a72-67059593bd62
+		lineageTag: b60367f3-5f62-418a-9014-da3e2f5b1368
 		summarizeBy: none
 		sourceColumn: Store Type
 
@@ -33,43 +29,43 @@ table Stores
 
 	column 'Store Name'
 		dataType: string
-		lineageTag: 04faebae-fd1c-4327-a772-c8ca30fe338b
+		lineageTag: c768ebd2-2a95-4617-b4d0-a05d67fe282e
 		summarizeBy: none
 		sourceColumn: Store Name
 
 		annotation SummarizationSetBy = Automatic
 
-	column status
+	column Status
 		dataType: string
-		lineageTag: dfa32bed-c369-4c0a-af1e-2202c8a4dce0
+		lineageTag: 75e645d8-c941-4ff8-8348-c068cca741f1
 		summarizeBy: none
-		sourceColumn: status
+		sourceColumn: Status
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Close Reason'
+	column CloseReason
 		dataType: string
-		lineageTag: 42af5b6f-37e2-47c3-9208-e9c744492595
+		lineageTag: 6517cefd-35c6-42cf-a230-f573d35eb5f3
 		summarizeBy: none
-		sourceColumn: Close Reason
+		sourceColumn: CloseReason
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Employee Count'
+	column EmployeeCount
 		dataType: int64
 		formatString: 0
-		lineageTag: e21a4750-df1b-40a5-8f63-9d32fd2f5b4b
+		lineageTag: fbeab64f-aecb-4972-b9e1-8357d4758ecf
 		summarizeBy: none
-		sourceColumn: Employee Count
+		sourceColumn: EmployeeCount
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Selling Area Size'
+	column SellingAreaSize
 		dataType: int64
 		formatString: 0
-		lineageTag: b72a6930-9590-4d9b-a68f-c529f313c6f0
+		lineageTag: 3f661881-8343-4a57-a7d6-36a5ae336942
 		summarizeBy: none
-		sourceColumn: Selling Area Size
+		sourceColumn: SellingAreaSize
 
 		annotation SummarizationSetBy = Automatic
 
@@ -77,10 +73,12 @@ table Stores
 		mode: import
 		source =
 				let
-				    Source = PostgreSQL.Database("localhost", "contoso_db"),
-				    public_stores = Source{[Schema="public",Item="stores"]}[Data]
+				    Source = GoogleSheets.Contents("https://docs.google.com/spreadsheets/d/1vC83yF8tJNvvqA3TabYA1Q9YY1qM2jOZ2nj3FKj__KU/edit?gid=1345312637#gid=1345312637"),
+				    Stores_Table = Source{[name="Stores",ItemKind="Table"]}[Data],
+				    #"Promoted Headers" = Table.PromoteHeaders(Stores_Table, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"StoreKey", Int64.Type}, {"GeographyKey", Int64.Type}, {"Store Type", type text}, {"Store Name", type text}, {"Status", type text}, {"CloseReason", type text}, {"EmployeeCount", Int64.Type}, {"SellingAreaSize", Int64.Type}})
 				in
-				    public_stores
+				    #"Changed Type"
 
 	annotation PBI_NavigationStepName = Navigation
 

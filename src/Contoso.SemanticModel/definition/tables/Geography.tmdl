@@ -1,40 +1,36 @@
 table Geography
-	lineageTag: 5488dc65-3721-4dc0-8f4d-e3e509e593ca
+	lineageTag: ffbfdb59-2504-4fc3-a28a-0b616c4ab12a
 
-	column geographykey
+	column GeographyKey
 		dataType: int64
-		isHidden
 		formatString: 0
-		isAvailableInMdx: false
-		lineageTag: da479c89-a697-452d-b049-3d7e0dc3daa3
+		lineageTag: 14cd47d0-a063-4279-bf92-2d6c66c2d262
 		summarizeBy: none
-		sourceColumn: geographykey
-
-		changedProperty = IsHidden
+		sourceColumn: GeographyKey
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Geography Type'
+	column GeographyType
 		dataType: string
-		lineageTag: 8ec04f05-7a28-4f92-9b22-e813b998e836
+		lineageTag: 68e3d234-a9fe-4fed-9f47-c652d0336ceb
 		summarizeBy: none
-		sourceColumn: Geography Type
+		sourceColumn: GeographyType
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Continent Name'
+	column ContinentName
 		dataType: string
-		lineageTag: 017d8900-38be-4e96-a02c-c47dc28ad592
+		lineageTag: 56d4b62b-f368-471e-be88-8e55ec85b621
 		summarizeBy: none
-		sourceColumn: Continent Name
+		sourceColumn: ContinentName
 
 		annotation SummarizationSetBy = Automatic
 
-	column country
+	column Country
 		dataType: string
-		lineageTag: 49023bf8-0fcb-4155-a3fe-826b351b6229
+		lineageTag: b93b5ddd-96ee-4553-80f3-0e5f8c57a73c
 		summarizeBy: none
-		sourceColumn: country
+		sourceColumn: Country
 
 		annotation SummarizationSetBy = Automatic
 
@@ -42,10 +38,12 @@ table Geography
 		mode: import
 		source =
 				let
-				    Source = PostgreSQL.Database("localhost", "contoso_db"),
-				    public_geography = Source{[Schema="public",Item="geography"]}[Data]
+				    Source = GoogleSheets.Contents("https://docs.google.com/spreadsheets/d/1vC83yF8tJNvvqA3TabYA1Q9YY1qM2jOZ2nj3FKj__KU/edit?gid=1345312637#gid=1345312637"),
+				    Geography_Table = Source{[name="Geography",ItemKind="Table"]}[Data],
+				    #"Promoted Headers" = Table.PromoteHeaders(Geography_Table, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"GeographyKey", Int64.Type}, {"GeographyType", type text}, {"ContinentName", type text}, {"Country", type text}})
 				in
-				    public_geography
+				    #"Changed Type"
 
 	annotation PBI_NavigationStepName = Navigation
 

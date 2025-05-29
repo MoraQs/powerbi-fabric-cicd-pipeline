@@ -23,7 +23,7 @@ table 'Fiscal Date Table'
 	column 'Fiscal Month'
 		formatString: 0
 		lineageTag: 84f2cd3b-1c88-4f99-a9cb-a076ae33a797
-		summarizeBy: sum
+		summarizeBy: none
 		isNameInferred
 		sourceColumn: [Fiscal Month]
 

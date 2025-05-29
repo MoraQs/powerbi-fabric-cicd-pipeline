@@ -1,57 +1,57 @@
 table Promotion
-	lineageTag: b2a3ac28-64fe-4c3c-a2d3-a7325b0df6ef
+	lineageTag: 7310a3b3-d52b-4702-8154-44d85c237910
 
-	column 'Promotion Key'
+	column PromotionKey
 		dataType: int64
 		formatString: 0
-		lineageTag: 65d14dab-6630-42d6-96ed-77d8a9d975f4
+		lineageTag: 42140f04-3322-42eb-b7f7-de5ae420c03d
 		summarizeBy: none
-		sourceColumn: Promotion Key
+		sourceColumn: PromotionKey
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Promotion Label'
+	column PromotionLabel
 		dataType: int64
 		formatString: 0
-		lineageTag: 7d716e5e-0456-498a-a365-194330cfe209
+		lineageTag: bf22e591-4b39-4f53-af85-7635a88cfdff
 		summarizeBy: none
-		sourceColumn: Promotion Label
+		sourceColumn: PromotionLabel
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Promotion Name'
+	column PromotionName
 		dataType: string
-		lineageTag: f20cd1ff-ceeb-4edb-b1ee-687bb23c6eee
+		lineageTag: 13fa02ff-9e5e-4f30-89d6-d08258de89bc
 		summarizeBy: none
-		sourceColumn: Promotion Name
+		sourceColumn: PromotionName
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Discount Percent'
-		dataType: decimal
-		lineageTag: 9a2128bf-9de1-44ff-be76-6099a8dc6228
+	column DiscountPercent
+		dataType: double
+		lineageTag: e49306ac-30de-40eb-82e9-dab57d166d4c
 		summarizeBy: none
-		sourceColumn: Discount Percent
+		sourceColumn: DiscountPercent
 
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	column 'Start Date'
+	column StartDate
 		dataType: dateTime
 		formatString: General Date
-		lineageTag: e06128c4-d292-4b1f-8800-ff5716cb9b8d
+		lineageTag: 481f5697-fc39-438a-8d0e-f1c25167d61b
 		summarizeBy: none
-		sourceColumn: Start Date
+		sourceColumn: StartDate
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'End Date'
+	column EndDate
 		dataType: dateTime
 		formatString: General Date
-		lineageTag: a6569b07-7b76-4265-9bd1-d622a0a794ec
+		lineageTag: bfa93f96-0bc7-4f88-8f7f-df5028715539
 		summarizeBy: none
-		sourceColumn: End Date
+		sourceColumn: EndDate
 
 		annotation SummarizationSetBy = Automatic
 
@@ -59,9 +59,10 @@ table Promotion
 		mode: import
 		source =
 				let
-				    Source = PostgreSQL.Database("localhost", "contoso_db"),
-				    public_promotion = Source{[Schema="public",Item="promotion"]}[Data],
-				    #"Changed Type" = Table.TransformColumnTypes(public_promotion,{{"Discount Percent", Currency.Type}})
+				    Source = GoogleSheets.Contents("https://docs.google.com/spreadsheets/d/1vC83yF8tJNvvqA3TabYA1Q9YY1qM2jOZ2nj3FKj__KU/edit?gid=1345312637#gid=1345312637"),
+				    Promotion_Table = Source{[name="Promotion",ItemKind="Table"]}[Data],
+				    #"Promoted Headers" = Table.PromoteHeaders(Promotion_Table, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"PromotionKey", Int64.Type}, {"PromotionLabel", Int64.Type}, {"PromotionName", type text}, {"DiscountPercent", type number}, {"StartDate", type datetime}, {"EndDate", type datetime}})
 				in
 				    #"Changed Type"
 
