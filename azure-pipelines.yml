@@ -133,12 +133,12 @@ stages:
             script: |
               #region Parameters
               # Access variables directly from the linked variable group
-              $clientId = "$(powerbi_client_id)"
-              $clientSecret = "$(powerbi_client_secret)"
+              $clientId = "$(clientId)"
+              $clientSecret = "$(ClientSecret)"
               $tenantId = "$(tenant_id)"
-              $workspaceId = "$(dev_workspace_id)"
-              $semanticModelName = "$(ContosoSemanticModelName)"
-              $googleSheetUrl = "$(source_data_url)"
+              $workspaceId = "$(workspaceId)"
+              $semanticModelName = "$(semanticModelName)"
+              $googleSheetUrl = "$(SourceUrl)"
 
               #endregion
 
