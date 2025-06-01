@@ -180,9 +180,13 @@ The environment variables are injected securely via the Azure DevOps variable gr
 
 ## Diagram
 
-![PROD deployment approval gate](docs/Images/prodapproval.png)
+Skip PROD deployment on feature branches
 
-![Full deployment](docs/Images/ProdDeployment.png)
+![Skip PROD deployment on feature branches](docs/Images/skipped_prod.png)
+
+Full deployment after merge to main branch
+
+![Full deployment](docs/Images/full_deployment.png)
 
 ### 🚧 Next Steps / Future Improvements
 
