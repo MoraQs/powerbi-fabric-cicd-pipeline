@@ -26,7 +26,7 @@ This repository implements a **CI/CD pipeline** for deploying **Power BI `.pbip`
   - `Workspace.Read.All`
 - SPN added as **Admin** or **Member** on target workspaces
 - A **self-hosted Windows agent** with:
-  - Python 3.12+
+  - Python "3.12"
   - `fabric-cicd` installed (`pip install fabric-cicd`)
 
 ## 1. 🛠️ Step-by-Step Setup
@@ -177,6 +177,12 @@ This script uses `fabric-cicd` to deploy both **Power BI semantic models** and *
 This script step is placed in the Deploy_DEV, Deploy_UAT, and Deploy_PROD stages of the pipeline.
 
 The environment variables are injected securely via the Azure DevOps variable group (`PowerBIDevelopmentVariables`) and mapped inside the job using the env: block
+
+## Diagram
+
+![PROD deployment approval gate](docs/Images/prodapproval.png)
+
+![Full deployment](docs/Images/ProdDeployment.png)
 
 ### 🚧 Next Steps / Future Improvements
 
